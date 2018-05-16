@@ -1,0 +1,262 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: frontend-backend-ssl
+metadata:
+  annotations:
+    description: Template for deploying Apache and Postgres on RHEL
+    iconClass: icon-postgres-database
+    tags: quickstart,oracle
+  name: frontend-backend-ssl
+objects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances the application pods
+    name: ${NAME}-frontend
+  spec:
+    ports:
+    - name: web
+      port: 8080
+      targetPort: 8080
+    selector:
+      name: ${NAME}-frontend
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${NAME}-frontend
+  spec:
+    host: ${APPLICATION_DOMAIN}
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: ${NAME}-frontend
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application image
+    name: ${NAME}-frontend
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      description: Defines how to build the application
+    name: ${NAME}-frontend
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${NAME}-frontend:latest
+    source:
+      contextDir: ${CONTEXT_DIR}
+      git:
+        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${SOURCE_REPOSITORY_URL}
+#        httpProxy: http://10.216.8.124:8081
+#        httpsProxy: https://10.216.8.124:8081
+#        noProxy: 
+      type: Git
+    strategy:
+      dockerStrategy:
+        env:
+        - name: GIT_SSL_NO_VERIFY
+          value: "true"
+        from:
+          kind: ImageStreamTag
+          name: rhel7:latest
+          namespace: openshift
+      type: Source
+    triggers:
+    - type: ImageChange
+    - type: ConfigChange
+    - github:
+        secret: ${GITHUB_WEBHOOK_SECRET}
+      type: GitHub
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Defines how to deploy the application server
+    name: ${NAME}-frontend
+  spec:
+    replicas: 1
+    selector:
+      name: ${NAME}-frontend
+    strategy:
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          name: ${NAME}-frontend
+        name: ${NAME}-frontend
+      spec:
+        containers:
+        - env:
+          - name: SERVICE_NAME
+            value: ${SERVICE_NAME}-frontend
+#          image: docker-registry.default.svc:5000/openshift/frontend
+           image: ' '
+          imagePullPolicy: IfNotPresent
+          name: frontend
+          ports:
+          - containerPort: 8080
+            name: web
+          resources:
+            limits:
+              memory: ${MEMORY_LIMIT}
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${NAME}-frontend:latest
+        lastTriggeredImage: ""
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances the application pods
+    name: backend
+  spec:
+    ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+    selector:
+      name: ${NAME}-backend
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application image
+    name: ${NAME}-backend
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      description: Defines how to build the application
+    name: ${NAME}-backend
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${NAME}-backend:latest
+    source:
+      contextDir: ${CONTEXT_DIR_BACKEND}
+      git:
+        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${SOURCE_REPOSITORY_URL}
+#        httpProxy: http://10.216.8.124:8081
+#        httpsProxy: https://10.216.8.124:8081
+#        noProxy: 
+      type: Git
+    strategy:
+      dockerStrategy:
+        env:
+        - name: GIT_SSL_NO_VERIFY
+          value: "true"
+        from:
+          kind: ImageStreamTag
+          name: rhel7:latest
+          namespace: openshift
+      type: Source
+    triggers:
+    - type: ImageChange
+    - type: ConfigChange
+    - github:
+        secret: ${GITHUB_WEBHOOK_SECRET}
+      type: GitHub
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Defines how to deploy the application server
+    name: ${NAME}-backend
+  spec:
+    replicas: 1
+    selector:
+      name: ${NAME}-backend
+    strategy:
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          name: ${NAME}-backend
+        name: ${NAME}-backend
+      spec:
+        containers:
+        - env:
+          - name: SERVICE_NAME
+            value: ${SERVICE_NAME}-backend
+#          image: docker-registry.default.svc:5000/openshift/backend
+          image: ' '
+          imagePullPolicy: IfNotPresent
+          name: backend
+          ports:
+          - containerPort: 3306
+            name: web
+          resources:
+            limits:
+              memory: ${MEMORY_LIMIT}
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${NAME}-backend:latest
+        lastTriggeredImage: ""
+      type: ImageChange
+    - type: ConfigChange
+parameters:
+- description: The name assigned to all of the frontend objects defined in this template.
+  displayName: Name
+  name: NAME
+  value: aci
+- description: Maximum amount of memory the container can use.
+  displayName: Memory Limit
+  name: MEMORY_LIMIT
+  value: 1024Mi
+- description: The exposed hostname that will route to the Application service, if
+    left blank a value will be defaulted.
+  displayName: Application Hostname
+  name: APPLICATION_DOMAIN
+- description: The URL of the repository with your application source code.
+  displayName: Git Repository URL
+  name: SOURCE_REPOSITORY_URL
+  value: https://github.com/shah-zobair/frontend-backend-ssl.git
+- description: Set this to a branch name, tag or other ref of your repository if you
+    are not using the default branch.
+  displayName: Git Reference
+  name: SOURCE_REPOSITORY_REF
+- description: Set this to the relative path to your project if it is not in the root
+    of your repository.
+  displayName: Context Directory
+  name: CONTEXT_DIR
+  value: frontend
+- description: Set this to the relative path to your project if it is not in the root
+    of your repository.
+  displayName: Context Directory for backend (postgres)
+  name: CONTEXT_DIR_BACKEND
+  value: postgres
+- description: A secret string used to configure the GitHub webhook.
+  displayName: GitHub Webhook Secret
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression
+  name: GITHUB_WEBHOOK_SECRET
