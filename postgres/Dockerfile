@@ -8,7 +8,6 @@
 FROM registry.access.redhat.com/rhel7
 MAINTAINER Shah Zobair <szobair@redhat.com>
 
-RUN cat /etc/resolv.conf
 RUN groupadd postgres -g 1001 && \
     useradd postgres -u 1001 -g 1001
 
@@ -20,10 +19,9 @@ ADD ./postgresql-setup /usr/bin/postgresql-setup
 ADD ./supervisord.conf /etc/supervisord.conf
 ADD ./start_postgres.sh /start_postgres.sh
 
-RUN chmod +x /usr/bin/postgresql-setup
-RUN chmod 777 /start_postgres.sh
-
-RUN /usr/bin/postgresql-setup initdb && \
+RUN chmod +x /usr/bin/postgresql-setup && \
+    chmod 777 /start_postgres.sh && \
+    /usr/bin/postgresql-setup initdb && \
     mkdir /BACKUP && \
     cp -pr /var/lib/pgsql/* /BACKUP/
 
