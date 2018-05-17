@@ -23,7 +23,8 @@ RUN chmod +x /usr/bin/postgresql-setup && \
     chmod 777 /start_postgres.sh && \
     /usr/bin/postgresql-setup initdb && \
     mkdir /BACKUP && \
-    cp -pr /var/lib/pgsql/* /BACKUP/
+    cp -pr /var/lib/pgsql/* /BACKUP/ && \
+    rm -fr /var/lib/pgsql/*
 
 ADD ./postgresql.conf /postgresql.conf
 ADD db_entry.sh /db_entry.sh
