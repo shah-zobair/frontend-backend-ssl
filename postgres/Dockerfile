@@ -9,8 +9,8 @@ FROM registry.access.redhat.com/rhel7
 MAINTAINER Shah Zobair <szobair@redhat.com>
 
 RUN cat /etc/resolv.conf
-RUN groupadd default -g 1001 && \
-    useradd default -u 1001 -g 1001
+RUN groupadd postgres -g 1001 && \
+    useradd postgres -u 1001 -g 1001
 
 RUN yum --disablerepo='*' --enablerepo=rhel-7-server-rpms --enablerepo=rhel-7-server-extras-rpms update -y && \
     yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
@@ -34,11 +34,11 @@ ADD CERT/server.crt /server.crt
 ADD CERT/root.crt /root.crt
 
 RUN chown -v postgres.postgres /var/lib/pgsql/data/postgresql.conf /db_entry.sh /server.key /server.crt /root.crt && \
-    chmod -R 777 /var/lib/pgsql
+    chmod -R 777 /var/lib/pgsql && \
+    chmod 660 /etc/passwd
 
 #VOLUME ["/var/lib/pgsql"]
-RUN id
 EXPOSE 5432
-USER postgres
-RUN id
+USER 1001
+
 CMD ["/bin/bash", "/start_postgres.sh"]
