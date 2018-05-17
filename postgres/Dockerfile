@@ -35,7 +35,7 @@ RUN chown -v postgres.postgres /var/lib/pgsql/data/postgresql.conf /db_entry.sh 
     chmod -R 777 /var/lib/pgsql && \
     chmod 660 /etc/passwd && \
     chmod 775 /etc && \
-    chown -R postgres.postgres /BACKUP
+    chown -Rv postgres.postgres /BACKUP
 
 #VOLUME ["/var/lib/pgsql"]
 EXPOSE 5432
