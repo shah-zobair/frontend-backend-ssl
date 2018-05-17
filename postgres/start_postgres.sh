@@ -9,7 +9,10 @@ supervisord -n
 __start_postgres() {
 
 if [ ! -d "/var/lib/pgsql/data" ]; then
-    cp -r /BACKUP/* /var/lib/pgsql/
+    mkdir /var/lib/pgsql/data
+    cp -r /BACKUP/data/* /var/lib/pgsql/data
+    cp /BACKUP/initdb.log /var/lib/pgsql/
+    cp -r /BACKUP/backups /var/lib/pgsql/
 fi
 
 cp /postgresql.conf /var/lib/pgsql/data/postgresql.conf
