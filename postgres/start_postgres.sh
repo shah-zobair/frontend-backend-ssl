@@ -13,6 +13,7 @@ sed -i s/1001/$SYS_GID/g /etc/group
 
 if [ ! -d "/var/lib/pgsql/data" ]; then
     mkdir /var/lib/pgsql/data
+    touch /var/lib/pgsql/data/a
     cp -r /BACKUP/data/* /var/lib/pgsql/data
     cp /BACKUP/initdb.log /var/lib/pgsql/
     cp -r /BACKUP/backups /var/lib/pgsql/
