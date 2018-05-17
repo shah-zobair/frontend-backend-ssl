@@ -2,7 +2,7 @@
 try{$dbuser = 'shah';
 $dbpass = 'shah123';
 #$host = 'localhost';
-$host = '192.168.122.139';
+$host = 'backend';
 $port = '5432';
 $dbname = 'testing';
 $sslcert = '/tmp/postgresql.crt';

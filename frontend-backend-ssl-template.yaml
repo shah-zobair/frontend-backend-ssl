@@ -10,6 +10,19 @@ metadata:
   name: frontend-backend-ssl
 objects:
 - apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: rhel7
+  spec:
+    tags:
+    - from:
+        kind: DockerImage
+        name: registry.access.redhat.com/rhel7
+      name: latest
+      importPolicy:
+        scheduled: true
+
+- apiVersion: v1
   kind: Service
   metadata:
     annotations:
@@ -102,7 +115,7 @@ objects:
           - name: SERVICE_NAME
             value: ${SERVICE_NAME}-frontend
 #          image: docker-registry.default.svc:5000/openshift/frontend
-          image: ' '
+          image: ${NAME}-frontend
           imagePullPolicy: IfNotPresent
           name: frontend
           ports:
@@ -204,7 +217,7 @@ objects:
           - name: SERVICE_NAME
             value: ${SERVICE_NAME}-backend
 #          image: docker-registry.default.svc:5000/openshift/backend
-          image: ' '
+          image: ${NAME}-backend
           imagePullPolicy: IfNotPresent
           name: backend
           ports:
