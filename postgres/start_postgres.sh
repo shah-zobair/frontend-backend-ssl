@@ -21,10 +21,10 @@ cp /server.key /var/lib/pgsql/data/server.key
 #echo "hostssl all         postgres    0.0.0.0/0             md5 clientcert=1" >> /var/lib/pgsql/data/pg_hba.conf
 echo "hostssl all         shah    0.0.0.0/0             md5 clientcert=1" >> /var/lib/pgsql/data/pg_hba.conf
 
-UID=`id -u`
-GID=`id -g`
-sed -i s/1001/$UID/g /etc/passwd
-sed -i s/1001/$GID/g /etc/group
+SYS_UID=`id -u`
+SYS_GID=`id -g`
+sed -i s/1001/$SYS_UID/g /etc/passwd
+sed -i s/1001/$SYS_GID/g /etc/group
 
 postgres --single -c config_file=${PG_CONFDIR}/postgresql.conf -D ${PG_CONFDIR}
 
