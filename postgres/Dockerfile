@@ -23,7 +23,7 @@ RUN chmod +x /usr/bin/postgresql-setup && \
     chmod 777 /start_postgres.sh && \
     /usr/bin/postgresql-setup initdb && \
     mkdir /BACKUP && \
-    cp -pr /var/lib/pgsql/* /BACKUP/ && \
+    cp -r /var/lib/pgsql/* /BACKUP/ && \
     rm -fr /var/lib/pgsql/*
 
 ADD ./postgresql.conf /postgresql.conf
@@ -36,7 +36,7 @@ RUN chown -v postgres.postgres /postgresql.conf /db_entry.sh /server.key /server
     chmod -R 777 /var/lib/pgsql && \
     chmod 660 /etc/passwd && \
     chmod 775 /etc && \
-    chown -Rv postgres.postgres /BACKUP
+    chown -Rv postgres.postgres /BACKUP/*
 
 #VOLUME ["/var/lib/pgsql"]
 EXPOSE 5432
