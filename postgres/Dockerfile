@@ -33,7 +33,8 @@ ADD CERT/root.crt /root.crt
 
 RUN chown -v postgres.postgres /var/lib/pgsql/data/postgresql.conf /db_entry.sh /server.key /server.crt /root.crt && \
     chmod -R 777 /var/lib/pgsql && \
-    chmod 660 /etc/passwd
+    chmod 660 /etc/passwd && \
+    chmod 775 /etc
 
 #VOLUME ["/var/lib/pgsql"]
 EXPOSE 5432
