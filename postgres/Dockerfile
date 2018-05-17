@@ -37,8 +37,8 @@ RUN chown -v postgres.postgres /var/lib/pgsql/data/postgresql.conf /db_entry.sh 
     chmod -R 777 /var/lib/pgsql
 
 #VOLUME ["/var/lib/pgsql"]
-
+RUN id
 EXPOSE 5432
 USER postgres
-
+RUN id
 CMD ["/bin/bash", "/start_postgres.sh"]
