@@ -2,11 +2,14 @@
 
 PG_CONFDIR="/var/lib/pgsql/data"
 
-__run_supervisor() {
-supervisord -n
-}
 
 __start_postgres() {
+
+
+SYS_UID=`id -u`
+SYS_GID=`id -g`
+sed -i s/1001/$SYS_UID/g /etc/passwd
+sed -i s/1001/$SYS_GID/g /etc/group
 
 if [ ! -d "/var/lib/pgsql/data" ]; then
     mkdir /var/lib/pgsql/data
@@ -24,13 +27,12 @@ cp /server.key /var/lib/pgsql/data/server.key
 #echo "hostssl all         postgres    0.0.0.0/0             md5 clientcert=1" >> /var/lib/pgsql/data/pg_hba.conf
 echo "hostssl all         shah    0.0.0.0/0             md5 clientcert=1" >> /var/lib/pgsql/data/pg_hba.conf
 
-SYS_UID=`id -u`
-SYS_GID=`id -g`
-sed -i s/1001/$SYS_UID/g /etc/passwd
-sed -i s/1001/$SYS_GID/g /etc/group
-
 postgres --single -c config_file=${PG_CONFDIR}/postgresql.conf -D ${PG_CONFDIR}
 
+}
+
+__run_supervisor() {
+supervisord -n
 }
 
 
