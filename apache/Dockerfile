@@ -26,17 +26,20 @@ RUN ln -sf /dev/stdout /etc/httpd/logs/access_log \
 ADD CERT/postgresql.key /tmp/postgresql.key
 ADD CERT/postgresql.crt /tmp/postgresql.crt
 ADD CERT/root.crt /tmp/root.crt
+ADD run.sh /tmp/run.sh
 RUN chown -v 1001:1001 /tmp/postgresql.key /tmp/postgresql.crt /tmp/root.crt && \
-    chmod 666 /tmp/postgresql.key
+    chmod 666 /tmp/postgresql.key && \
+    chmod 777 /tmp/run.sh
 
 
 USER 1001
-RUN cat /tmp/postgresql.key > /tmp/postgresql-user.key && \
-    chmod 600 /tmp/postgresql-user.key
+#RUN cat /tmp/postgresql.key > /tmp/postgresql-user.key && \
+#    chmod 600 /tmp/postgresql-user.key
 
 EXPOSE 8080
 
 COPY index.html /var/www/html/
 COPY db-ssl.php /var/www/html/
 
-CMD ["httpd", "-D", "FOREGROUND"]
+#CMD ["httpd", "-D", "FOREGROUND"]
+CMD ["/tmp/run.sh"]
