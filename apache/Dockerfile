@@ -37,7 +37,7 @@ USER 1001
 #RUN cat /tmp/postgresql.key > /tmp/postgresql-user.key && \
 #    chmod 600 /tmp/postgresql-user.key
 
-EXPOSE 8080
+EXPOSE 8080 8443
 
 COPY index.html /var/www/html/
 COPY db-ssl.php /var/www/html/
