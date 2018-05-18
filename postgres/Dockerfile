@@ -17,26 +17,25 @@ RUN yum --disablerepo='*' --enablerepo=rhel-7-server-rpms --enablerepo=rhel-7-se
 
 ADD ./postgresql-setup /usr/bin/postgresql-setup
 ADD ./supervisord.conf /etc/supervisord.conf
-ADD ./start_postgres.sh /start_postgres.sh
 
-RUN chmod +x /usr/bin/postgresql-setup && \
-    chmod 777 /start_postgres.sh && \
+RUN chmod +x /usr/bin/postgresql-setup && \ 
     /usr/bin/postgresql-setup initdb && \
     mkdir /BACKUP && \
     cp -r /var/lib/pgsql/* /BACKUP/ && \
     rm -fr /var/lib/pgsql/*
 
-ADD ./postgresql.conf /postgresql.conf
-ADD db_entry.sh /db_entry.sh
-ADD CERT/server.key /server.key
-ADD CERT/server.crt /server.crt
-ADD CERT/root.crt /root.crt
-
+#ADD postgresql.conf /postgresql.conf
+#ADD db_entry.sh /db_entry.sh
+#ADD CERT/server.key /server.key
+#ADD CERT/server.crt /server.crt
+#ADD CERT/root.crt /root.crt
+COPY postgresql.conf db_entry.sh start_postgres.sh CERT /
 RUN chown -v postgres.postgres /postgresql.conf /db_entry.sh /server.key /server.crt /root.crt && \
     chmod -R 777 /var/lib/pgsql && \
+    chmod 777 /start_postgres.sh && \
     chmod 660 /etc/passwd && \
     chmod 777 /etc && \
-    chown -Rv postgres.postgres /BACKUP/* && \
+    chown -R postgres.postgres /BACKUP/* && \
     chmod -R 777 /BACKUP/ /var/run/postgresql/
 
 #VOLUME ["/var/lib/pgsql"]
