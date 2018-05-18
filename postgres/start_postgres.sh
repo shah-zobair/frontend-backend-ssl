@@ -30,7 +30,7 @@ chmod 600 /var/lib/pgsql/data/server.key
 #echo "hostssl all         postgres    0.0.0.0/0             md5 clientcert=1" >> /var/lib/pgsql/data/pg_hba.conf
 echo "hostssl all         shah    0.0.0.0/0             md5 clientcert=1" >> /var/lib/pgsql/data/pg_hba.conf
 
-echo "CREATE DATABASE testing; CREATE TABLE dummy (name varchar(50), id int); INSERT INTO dummy (name, id) values ('shah',1); INSERT INTO dummy (name, id) values ('shah',1); CREATE ROLE shah with CREATEROLE login superuser PASSWORD 'shah123'; GRANT ALL PRIVILEGES ON DATABASE testing to shah;" | postgres --single -c config_file=${PG_CONFDIR}/postgresql.conf -D ${PG_CONFDIR}
+echo "CREATE DATABASE testing; CREATE TABLE dummy (name varchar(50), id int); INSERT INTO dummy (name, id) values ('shah',1); CREATE ROLE shah with CREATEROLE login superuser PASSWORD 'shah123'; GRANT ALL PRIVILEGES ON DATABASE testing to shah;" | postgres --single -c config_file=${PG_CONFDIR}/postgresql.conf -D ${PG_CONFDIR}
 
 #postgres --single -c config_file=${PG_CONFDIR}/postgresql.conf -D ${PG_CONFDIR}
 
