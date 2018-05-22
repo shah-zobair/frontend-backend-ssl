@@ -27,3 +27,11 @@ openssl req -new -key postgresql.key -out postgresql.csr -subj '/C=CA/ST=ON/L=TO
 openssl x509 -req -in postgresql.csr -CA ../root.crt -CAkey ../server.key -out postgresql.crt -CAcreateserial   #<< Using root.crt and server.key
 
 #########################
+# Cert for Apache Server
+# https://gist.github.com/Soarez/9688998
+openssl genrsa -out ca.key 2048
+openssl req -new -x509 -key ca.key -out ca.crt
+openssl genrsa -out apache.key 2048
+vi cert.conf
+openssl req -new -out apache.csr -config cert.conf
+openssl x509 -req -in apache.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out apache.crt
