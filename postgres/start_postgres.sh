@@ -21,9 +21,9 @@ if [ ! -d "/var/lib/pgsql/data" ]; then
 fi
 
 cp /postgresql.conf /var/lib/pgsql/data/postgresql.conf
-cp /root.crt /var/lib/pgsql/data/root.crt
-cp /server.crt /var/lib/pgsql/data/server.crt
-cp /server.key /var/lib/pgsql/data/server.key
+cp /tmp/certs/root.crt /var/lib/pgsql/data/root.crt
+cp /tmp/certs/server.crt /var/lib/pgsql/data/server.crt
+cp /tmp/certs/server.key /var/lib/pgsql/data/server.key
 chmod 600 /var/lib/pgsql/data/server.key 
 
 #echo "host    all             all             0.0.0.0/0               md5" >> /var/lib/pgsql/data/pg_hba.conf
