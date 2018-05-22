@@ -6,7 +6,7 @@ $host = 'backend';
 $port = '5432';
 $dbname = 'testing';
 $sslcert = '/tmp/certs/postgresql.crt';
-$sslkey = '/tmp/certs/postgresql-user.key';
+$sslkey = '/tmp/postgresql-user.key';
 $sslrootcert = '/tmp/certs/root.crt';
 
 $conn = new PDO("pgsql:host=$host;dbname=$dbname;port=$port;sslmode=require;sslcert=$sslcert;sslkey=$sslkey;sslrootcert=$sslrootcert", $dbuser, $dbpass);
