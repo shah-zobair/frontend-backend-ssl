@@ -124,6 +124,20 @@ objects:
           resources:
             limits:
               memory: ${MEMORY_LIMIT}
+          volumeMounts:
+          - mountPath: /etc/pki/tls/certs
+            name: apache-cert
+          - mountPath: /etc/pki/tls/private
+            name: apache-key
+        volumes:
+        - name: apache-cert
+          configMap:
+            defaultMode: 420
+            name: apache-cert
+        - name: apache-key
+          configMap:
+            defaultMode: 400
+            name: apache-key
     triggers:
     - imageChangeParams:
         automatic: true
@@ -237,6 +251,68 @@ objects:
         lastTriggeredImage: ""
       type: ImageChange
     - type: ConfigChange
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: apache-cert
+  data:
+    frontend.cert: |
+    -----BEGIN CERTIFICATE-----
+    MIIDaDCCAlACCQC07fAVNJUxZTANBgkqhkiG9w0BAQsFADCBiDELMAkGA1UEBhMC
+    Q0ExCzAJBgNVBAgMAk9OMRAwDgYDVQQHDAdUb3JvbnRvMRQwEgYDVQQKDAtSZWQg
+    SGF0IEluYzELMAkGA1UECwwCU1MxFDASBgNVBAMMC1JlZCBIYXQgSW5jMSEwHwYJ
+    KoZIhvcNAQkBFhJzem9iYWlyQHJlZGhhdC5jb20wHhcNMTgwNTIyMTQyNDM4WhcN
+    MTgwNjIxMTQyNDM4WjBjMQswCQYDVQQGEwJDQTELMAkGA1UECAwCT04xEDAOBgNV
+    BAcMB1Rvcm9udG8xCzAJBgNVBAoMAlNTMSgwJgYDVQQDDB8qLmU4Y2EuZW5naW50
+    Lm9wZW5zaGlmdGFwcHMuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
+    AQEA8Tt7yM/tt42BibDuvepStg1QdC0dzvUBg6Yb8G42DLEI2Wx1JITt0z88xrzj
+    mu4A7bhWjcAg7ubaFDfi5RzGIapBURYE7SCymXraUdcMVaDJbxNLV3UUuyO+V6qN
+    dD9pe6dQYCmzvyffMCtVcTPUHeSLFD/51S69WFugt19tLFVeK/7QOcwsJ1sW+QEL
+    u6ls+Ih5ViHc7JHjXFrQanCSjaFXXrwDBJ8fLTHJuzegbD30/IpoqKUjqVGHxn6L
+    uJw28ZutcE9BucSDf7YPKlfLIH9HOLokJGRfJYYzgP+BhjromHHi2dLbmCwfhLXD
+    NlhfIRP5HS2zoDPCiqEEH9rgPwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCwbubQ
+    R0wZH3HovymnFu5gqN9f/SjFQXF025ZRhH433ouyHFOCRqrg6a64NyIQ5o8CKVyd
+    7JTSUqM8BsG2y/bIzeIIsTqesxYqu3oLTDf7LDrozC2VBwD3ga32oow1KKCqER0R
+    7Ju4+YBLq9XgoNJDcUd1IgQEb6JIFqbhc9nIFQUnEZHwmUKBQbVcxw71C4Ufbett
+    PzyExKT6m/fxYg71V7eb/nyKprwLSvZbbEEYqZd7RV2sRyfYuIiAQdyhr97oGk15
+    TJostDfTO4J9FN6Qvm9eHz4+kF+3TVMnZS75Hr4XVWsDXm6wR1vS+DFHKL+TH4AQ
+    GO0WaexSWrfC4Jfb
+    -----END CERTIFICATE-----
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: apache-key
+  data:
+    frontend.key: |
+    -----BEGIN PRIVATE KEY-----
+    MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDxO3vIz+23jYGJ
+    sO696lK2DVB0LR3O9QGDphvwbjYMsQjZbHUkhO3TPzzGvOOa7gDtuFaNwCDu5toU
+    N+LlHMYhqkFRFgTtILKZetpR1wxVoMlvE0tXdRS7I75Xqo10P2l7p1BgKbO/J98w
+    K1VxM9Qd5IsUP/nVLr1YW6C3X20sVV4r/tA5zCwnWxb5AQu7qWz4iHlWIdzskeNc
+    WtBqcJKNoVdevAMEnx8tMcm7N6BsPfT8imiopSOpUYfGfou4nDbxm61wT0G5xIN/
+    tg8qV8sgf0c4uiQkZF8lhjOA/4GGOuiYceLZ0tuYLB+EtcM2WF8hE/kdLbOgM8KK
+    oQQf2uA/AgMBAAECggEAZaWZ6CjtUt22iq1aO/4jsgB0OS/VkqIcbDuvJCVccwaZ
+    4vvXdHbqu4u28UsgYOUO0RxOpFYjymbN150g50ezmPXjpeYwVzbi6tcgbUG/OcmR
+    d1Na+NQl0yEhkFEWX7hkmy0KKisISXDkk6h+zT94jswBapv2isSyFiwt0XbNStMw
+    c6oCQ/vQaxv++6z8AJAH+4atpoXsDpUn3NEFcGqG2eRjqc6jI2zS9MSRSknaDsCG
+    AnV8dS5wg1JVXa2aWG3xS3rC6WhfB0ZKgIETN2cZ/1gPb1SORg66OuLoK2LCRy6x
+    xv4deJPskfwDhfwfpqy3DSU1OAUOVYWBvIKOh9jX4QKBgQD8AIx6ImW+zXWCubrU
+    izPA2sDei5zB1YELwIiIUq6s4F/DZRLUHuCjROQmYy1fzg5+x0loxFVMWjcaZPa9
+    nl4IW4JiWoSM1U+Jym8Iv/SC3Y0PgbMPxX1ZsqiHYqxy4jvldqavd1/AXkPJ0GoJ
+    3zG0IMNpmgfdv6l8g+dMFqL8cQKBgQD1DzIX9jYr4CVSK9zOQ0ATVhJ/epX9sHD7
+    CkTlxIdco5NiLFkkys4LnEqBEEbzh5HXNB5K0VPD5i7haILmn0m1IcPV+Lerq/Xr
+    HleJwMsnDRNl7uQF22JjWfSNDQbUlyNx6k/WEoRppQxtwGM35pi96frmQKrx296O
+    k19COZi/rwKBgCUSS5gYAVG9VeEiQ3rK85UWWTMj5K6bIv3AmBU93JZv94Z+EvQD
+    itZZ5xpCksU6QeWimYkBAO9Xgi2u1qF0b67ZD2g6mq9BHg9OKWFnI6gwwXSbhuT2
+    D4engaVQ/b90yozqFIFRlVNuSpigwUisfdpay4R4dVnIvT0lBlyqI9XxAoGAAYOv
+    hpBh81F2SZS1z5yAx93PTXRfeurdN9/vXxAg2gS0w3WMs3qBXXcAyt1j4ttinlbX
+    HRVAFETW41O3A1/Wn8TupeLcl7X/Vg2g8tv7JWmiRg384MBjUkPbDAgZk7S/ZlPR
+    XHxOzyxS8FaxBkZpiTrp7wRVShtWu8DTZOBgPkcCgYAdSHCSa/hRG0NmfWXZxGbd
+    Eaxa4I+hRhqXP+HnBr1/1Ajc846jC7zqZY4pf0eRfNkIdbmtEJL4fIgAOByE98xn
+    O66d4Kvzrf5he5Bm/St2djutVORAIz3wqvu+PXCBrcg9JrwpcqOT1sgSUAI5bDgD
+    lU3kR1r1zQvuF3OysxYQ3g==
+    -----END PRIVATE KEY-----
+
 parameters:
 - description: The name assigned to all of the frontend objects defined in this template.
   displayName: Name
