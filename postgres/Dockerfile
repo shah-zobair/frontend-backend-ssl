@@ -1,6 +1,3 @@
-# "ported" by Adam Miller <maxamillion@fedoraproject.org> from
-#   https://github.com/fedora-cloud/Fedora-Dockerfiles
-#
 # Originally written for Fedora-Dockerfiles by
 #   scollier <scollier@redhat.com>
 # Modified to run on RHEL and to add SSL Connection by Shah Zobair
@@ -24,12 +21,8 @@ RUN chmod +x /usr/bin/postgresql-setup && \
     cp -r /var/lib/pgsql/* /BACKUP/ && \
     rm -fr /var/lib/pgsql/*
 
-#ADD postgresql.conf /postgresql.conf
-#ADD db_entry.sh /db_entry.sh
-#ADD CERT/server.key /server.key
-#ADD CERT/server.crt /server.crt
-#ADD CERT/root.crt /root.crt
 COPY postgresql.conf db_entry.sh start_postgres.sh CERT /
+
 RUN chown -v postgres.postgres /postgresql.conf /db_entry.sh /server.key /server.crt /root.crt && \
     chmod -R 777 /var/lib/pgsql && \
     chmod 777 /start_postgres.sh && \
@@ -38,7 +31,6 @@ RUN chown -v postgres.postgres /postgresql.conf /db_entry.sh /server.key /server
     chown -R postgres.postgres /BACKUP/* && \
     chmod -R 777 /BACKUP/ /var/run/postgresql/
 
-#VOLUME ["/var/lib/pgsql"]
 EXPOSE 5432
 USER 1001
 
