@@ -129,6 +129,12 @@ objects:
             name: apache-cert
           - mountPath: /etc/pki/tls/private
             name: apache-key
+          - mountPath: /tmp/certs
+            name: postgres-client-certs
+#          - mountPath: /etc/pki/tls/private
+#            name: postgres-client-key
+#          - mountPath: /etc/pki/tls/private
+#            name: postgres-root-cert            
         volumes:
         - name: apache-cert
           configMap:
@@ -138,6 +144,10 @@ objects:
           configMap:
             defaultMode: 400
             name: apache-key
+        - name: postgres-client-certs
+          configMap:
+            defaultMode: 666
+            name: postgres-client-certs            
     triggers:
     - imageChangeParams:
         automatic: true
@@ -257,61 +267,115 @@ objects:
     name: apache-cert
   data:
     frontend.cert: |
-    -----BEGIN CERTIFICATE-----
-    MIIDaDCCAlACCQC07fAVNJUxZTANBgkqhkiG9w0BAQsFADCBiDELMAkGA1UEBhMC
-    Q0ExCzAJBgNVBAgMAk9OMRAwDgYDVQQHDAdUb3JvbnRvMRQwEgYDVQQKDAtSZWQg
-    SGF0IEluYzELMAkGA1UECwwCU1MxFDASBgNVBAMMC1JlZCBIYXQgSW5jMSEwHwYJ
-    KoZIhvcNAQkBFhJzem9iYWlyQHJlZGhhdC5jb20wHhcNMTgwNTIyMTQyNDM4WhcN
-    MTgwNjIxMTQyNDM4WjBjMQswCQYDVQQGEwJDQTELMAkGA1UECAwCT04xEDAOBgNV
-    BAcMB1Rvcm9udG8xCzAJBgNVBAoMAlNTMSgwJgYDVQQDDB8qLmU4Y2EuZW5naW50
-    Lm9wZW5zaGlmdGFwcHMuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
-    AQEA8Tt7yM/tt42BibDuvepStg1QdC0dzvUBg6Yb8G42DLEI2Wx1JITt0z88xrzj
-    mu4A7bhWjcAg7ubaFDfi5RzGIapBURYE7SCymXraUdcMVaDJbxNLV3UUuyO+V6qN
-    dD9pe6dQYCmzvyffMCtVcTPUHeSLFD/51S69WFugt19tLFVeK/7QOcwsJ1sW+QEL
-    u6ls+Ih5ViHc7JHjXFrQanCSjaFXXrwDBJ8fLTHJuzegbD30/IpoqKUjqVGHxn6L
-    uJw28ZutcE9BucSDf7YPKlfLIH9HOLokJGRfJYYzgP+BhjromHHi2dLbmCwfhLXD
-    NlhfIRP5HS2zoDPCiqEEH9rgPwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCwbubQ
-    R0wZH3HovymnFu5gqN9f/SjFQXF025ZRhH433ouyHFOCRqrg6a64NyIQ5o8CKVyd
-    7JTSUqM8BsG2y/bIzeIIsTqesxYqu3oLTDf7LDrozC2VBwD3ga32oow1KKCqER0R
-    7Ju4+YBLq9XgoNJDcUd1IgQEb6JIFqbhc9nIFQUnEZHwmUKBQbVcxw71C4Ufbett
-    PzyExKT6m/fxYg71V7eb/nyKprwLSvZbbEEYqZd7RV2sRyfYuIiAQdyhr97oGk15
-    TJostDfTO4J9FN6Qvm9eHz4+kF+3TVMnZS75Hr4XVWsDXm6wR1vS+DFHKL+TH4AQ
-    GO0WaexSWrfC4Jfb
-    -----END CERTIFICATE-----
+      -----BEGIN CERTIFICATE-----
+      MIIDaDCCAlACCQC07fAVNJUxZTANBgkqhkiG9w0BAQsFADCBiDELMAkGA1UEBhMC
+      Q0ExCzAJBgNVBAgMAk9OMRAwDgYDVQQHDAdUb3JvbnRvMRQwEgYDVQQKDAtSZWQg
+      SGF0IEluYzELMAkGA1UECwwCU1MxFDASBgNVBAMMC1JlZCBIYXQgSW5jMSEwHwYJ
+      KoZIhvcNAQkBFhJzem9iYWlyQHJlZGhhdC5jb20wHhcNMTgwNTIyMTQyNDM4WhcN
+      MTgwNjIxMTQyNDM4WjBjMQswCQYDVQQGEwJDQTELMAkGA1UECAwCT04xEDAOBgNV
+      BAcMB1Rvcm9udG8xCzAJBgNVBAoMAlNTMSgwJgYDVQQDDB8qLmU4Y2EuZW5naW50
+      Lm9wZW5zaGlmdGFwcHMuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
+      AQEA8Tt7yM/tt42BibDuvepStg1QdC0dzvUBg6Yb8G42DLEI2Wx1JITt0z88xrzj
+      mu4A7bhWjcAg7ubaFDfi5RzGIapBURYE7SCymXraUdcMVaDJbxNLV3UUuyO+V6qN
+      dD9pe6dQYCmzvyffMCtVcTPUHeSLFD/51S69WFugt19tLFVeK/7QOcwsJ1sW+QEL
+      u6ls+Ih5ViHc7JHjXFrQanCSjaFXXrwDBJ8fLTHJuzegbD30/IpoqKUjqVGHxn6L
+      uJw28ZutcE9BucSDf7YPKlfLIH9HOLokJGRfJYYzgP+BhjromHHi2dLbmCwfhLXD
+      NlhfIRP5HS2zoDPCiqEEH9rgPwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCwbubQ
+      R0wZH3HovymnFu5gqN9f/SjFQXF025ZRhH433ouyHFOCRqrg6a64NyIQ5o8CKVyd
+      7JTSUqM8BsG2y/bIzeIIsTqesxYqu3oLTDf7LDrozC2VBwD3ga32oow1KKCqER0R
+      7Ju4+YBLq9XgoNJDcUd1IgQEb6JIFqbhc9nIFQUnEZHwmUKBQbVcxw71C4Ufbett
+      PzyExKT6m/fxYg71V7eb/nyKprwLSvZbbEEYqZd7RV2sRyfYuIiAQdyhr97oGk15
+      TJostDfTO4J9FN6Qvm9eHz4+kF+3TVMnZS75Hr4XVWsDXm6wR1vS+DFHKL+TH4AQ
+      GO0WaexSWrfC4Jfb
+      -----END CERTIFICATE-----
 - apiVersion: v1
   kind: ConfigMap
   metadata:
     name: apache-key
   data:
     frontend.key: |
-    -----BEGIN PRIVATE KEY-----
-    MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDxO3vIz+23jYGJ
-    sO696lK2DVB0LR3O9QGDphvwbjYMsQjZbHUkhO3TPzzGvOOa7gDtuFaNwCDu5toU
-    N+LlHMYhqkFRFgTtILKZetpR1wxVoMlvE0tXdRS7I75Xqo10P2l7p1BgKbO/J98w
-    K1VxM9Qd5IsUP/nVLr1YW6C3X20sVV4r/tA5zCwnWxb5AQu7qWz4iHlWIdzskeNc
-    WtBqcJKNoVdevAMEnx8tMcm7N6BsPfT8imiopSOpUYfGfou4nDbxm61wT0G5xIN/
-    tg8qV8sgf0c4uiQkZF8lhjOA/4GGOuiYceLZ0tuYLB+EtcM2WF8hE/kdLbOgM8KK
-    oQQf2uA/AgMBAAECggEAZaWZ6CjtUt22iq1aO/4jsgB0OS/VkqIcbDuvJCVccwaZ
-    4vvXdHbqu4u28UsgYOUO0RxOpFYjymbN150g50ezmPXjpeYwVzbi6tcgbUG/OcmR
-    d1Na+NQl0yEhkFEWX7hkmy0KKisISXDkk6h+zT94jswBapv2isSyFiwt0XbNStMw
-    c6oCQ/vQaxv++6z8AJAH+4atpoXsDpUn3NEFcGqG2eRjqc6jI2zS9MSRSknaDsCG
-    AnV8dS5wg1JVXa2aWG3xS3rC6WhfB0ZKgIETN2cZ/1gPb1SORg66OuLoK2LCRy6x
-    xv4deJPskfwDhfwfpqy3DSU1OAUOVYWBvIKOh9jX4QKBgQD8AIx6ImW+zXWCubrU
-    izPA2sDei5zB1YELwIiIUq6s4F/DZRLUHuCjROQmYy1fzg5+x0loxFVMWjcaZPa9
-    nl4IW4JiWoSM1U+Jym8Iv/SC3Y0PgbMPxX1ZsqiHYqxy4jvldqavd1/AXkPJ0GoJ
-    3zG0IMNpmgfdv6l8g+dMFqL8cQKBgQD1DzIX9jYr4CVSK9zOQ0ATVhJ/epX9sHD7
-    CkTlxIdco5NiLFkkys4LnEqBEEbzh5HXNB5K0VPD5i7haILmn0m1IcPV+Lerq/Xr
-    HleJwMsnDRNl7uQF22JjWfSNDQbUlyNx6k/WEoRppQxtwGM35pi96frmQKrx296O
-    k19COZi/rwKBgCUSS5gYAVG9VeEiQ3rK85UWWTMj5K6bIv3AmBU93JZv94Z+EvQD
-    itZZ5xpCksU6QeWimYkBAO9Xgi2u1qF0b67ZD2g6mq9BHg9OKWFnI6gwwXSbhuT2
-    D4engaVQ/b90yozqFIFRlVNuSpigwUisfdpay4R4dVnIvT0lBlyqI9XxAoGAAYOv
-    hpBh81F2SZS1z5yAx93PTXRfeurdN9/vXxAg2gS0w3WMs3qBXXcAyt1j4ttinlbX
-    HRVAFETW41O3A1/Wn8TupeLcl7X/Vg2g8tv7JWmiRg384MBjUkPbDAgZk7S/ZlPR
-    XHxOzyxS8FaxBkZpiTrp7wRVShtWu8DTZOBgPkcCgYAdSHCSa/hRG0NmfWXZxGbd
-    Eaxa4I+hRhqXP+HnBr1/1Ajc846jC7zqZY4pf0eRfNkIdbmtEJL4fIgAOByE98xn
-    O66d4Kvzrf5he5Bm/St2djutVORAIz3wqvu+PXCBrcg9JrwpcqOT1sgSUAI5bDgD
-    lU3kR1r1zQvuF3OysxYQ3g==
-    -----END PRIVATE KEY-----
+      -----BEGIN PRIVATE KEY-----
+      MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDxO3vIz+23jYGJ
+      sO696lK2DVB0LR3O9QGDphvwbjYMsQjZbHUkhO3TPzzGvOOa7gDtuFaNwCDu5toU
+      N+LlHMYhqkFRFgTtILKZetpR1wxVoMlvE0tXdRS7I75Xqo10P2l7p1BgKbO/J98w
+      K1VxM9Qd5IsUP/nVLr1YW6C3X20sVV4r/tA5zCwnWxb5AQu7qWz4iHlWIdzskeNc
+      WtBqcJKNoVdevAMEnx8tMcm7N6BsPfT8imiopSOpUYfGfou4nDbxm61wT0G5xIN/
+      tg8qV8sgf0c4uiQkZF8lhjOA/4GGOuiYceLZ0tuYLB+EtcM2WF8hE/kdLbOgM8KK
+      oQQf2uA/AgMBAAECggEAZaWZ6CjtUt22iq1aO/4jsgB0OS/VkqIcbDuvJCVccwaZ
+      4vvXdHbqu4u28UsgYOUO0RxOpFYjymbN150g50ezmPXjpeYwVzbi6tcgbUG/OcmR
+      d1Na+NQl0yEhkFEWX7hkmy0KKisISXDkk6h+zT94jswBapv2isSyFiwt0XbNStMw
+      c6oCQ/vQaxv++6z8AJAH+4atpoXsDpUn3NEFcGqG2eRjqc6jI2zS9MSRSknaDsCG
+      AnV8dS5wg1JVXa2aWG3xS3rC6WhfB0ZKgIETN2cZ/1gPb1SORg66OuLoK2LCRy6x
+      xv4deJPskfwDhfwfpqy3DSU1OAUOVYWBvIKOh9jX4QKBgQD8AIx6ImW+zXWCubrU
+      izPA2sDei5zB1YELwIiIUq6s4F/DZRLUHuCjROQmYy1fzg5+x0loxFVMWjcaZPa9
+      nl4IW4JiWoSM1U+Jym8Iv/SC3Y0PgbMPxX1ZsqiHYqxy4jvldqavd1/AXkPJ0GoJ
+      3zG0IMNpmgfdv6l8g+dMFqL8cQKBgQD1DzIX9jYr4CVSK9zOQ0ATVhJ/epX9sHD7
+      CkTlxIdco5NiLFkkys4LnEqBEEbzh5HXNB5K0VPD5i7haILmn0m1IcPV+Lerq/Xr
+      HleJwMsnDRNl7uQF22JjWfSNDQbUlyNx6k/WEoRppQxtwGM35pi96frmQKrx296O
+      k19COZi/rwKBgCUSS5gYAVG9VeEiQ3rK85UWWTMj5K6bIv3AmBU93JZv94Z+EvQD
+      itZZ5xpCksU6QeWimYkBAO9Xgi2u1qF0b67ZD2g6mq9BHg9OKWFnI6gwwXSbhuT2
+      D4engaVQ/b90yozqFIFRlVNuSpigwUisfdpay4R4dVnIvT0lBlyqI9XxAoGAAYOv
+      hpBh81F2SZS1z5yAx93PTXRfeurdN9/vXxAg2gS0w3WMs3qBXXcAyt1j4ttinlbX
+      HRVAFETW41O3A1/Wn8TupeLcl7X/Vg2g8tv7JWmiRg384MBjUkPbDAgZk7S/ZlPR
+      XHxOzyxS8FaxBkZpiTrp7wRVShtWu8DTZOBgPkcCgYAdSHCSa/hRG0NmfWXZxGbd
+      Eaxa4I+hRhqXP+HnBr1/1Ajc846jC7zqZY4pf0eRfNkIdbmtEJL4fIgAOByE98xn
+      O66d4Kvzrf5he5Bm/St2djutVORAIz3wqvu+PXCBrcg9JrwpcqOT1sgSUAI5bDgD
+      lU3kR1r1zQvuF3OysxYQ3g==
+      -----END PRIVATE KEY-----
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: postgres-client-certs
+  data:
+    postgresql.crt: |-
+      -----BEGIN CERTIFICATE-----
+      MIICNDCCAZ0CCQDZ81GZP/xXVTANBgkqhkiG9w0BAQsFADBxMQswCQYDVQQGEwJD
+      QTELMAkGA1UECAwCT04xEDAOBgNVBAcMB1Rvcm9udG8xDzANBgNVBAoMBlJlZEhh
+      dDEPMA0GA1UEAwwGUmVkSGF0MSEwHwYJKoZIhvcNAQkBFhJzem9iYWlyQHJlZGhh
+      dC5jb20wHhcNMTgwNTE2MjA0NDA3WhcNMTgwNjE1MjA0NDA3WjBMMQswCQYDVQQG
+      EwJDQTELMAkGA1UECAwCT04xEDAOBgNVBAcMB1Rvcm9udG8xDzANBgNVBAoMBlJl
+      ZEhhdDENMAsGA1UEAwwEc2hhaDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA
+      ve2XZQz3e+xM1GbKXQCN6DPTi0H6iHYGSSFBmKEuYAA/LGUBOzevoYm0ZJzZ50Z8
+      dtEJh1Jos6c/14Ka9R6TvzH5U8kIhrP90G9Gnj12PoNiqP7D4CQQL4YO1vBSpllq
+      bk6/omEU8W+1OlN+axBdX+DfXAr8zyXuDqQBdzAw1hsCAwEAATANBgkqhkiG9w0B
+      AQsFAAOBgQBAj7pcRlwvJuhcAxE31Y6Lh+sdgIbPLGmXw7ahgG59SIQJFoLQQf5j
+      MLiuuOBtR966CvklMV4Kn2s6OFaQl4N/KYrERRxp2Pr0iS//KZHaZGBayRMowH49
+      92rDBqKIxZ6VbfZf6vGIvV/X6GEmT0Sn95VC66KJ3xaiC/42z5D1zg==
+      -----END CERTIFICATE-----
+    postgresql.key: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIICXQIBAAKBgQC97ZdlDPd77EzUZspdAI3oM9OLQfqIdgZJIUGYoS5gAD8sZQE7
+      N6+hibRknNnnRnx20QmHUmizpz/Xgpr1HpO/MflTyQiGs/3Qb0aePXY+g2Ko/sPg
+      JBAvhg7W8FKmWWpuTr+iYRTxb7U6U35rEF1f4N9cCvzPJe4OpAF3MDDWGwIDAQAB
+      AoGBAIpo6zupB3I38oWXo0HDdacSnceOfZWU7V+97J/eVn1/sIoZ0ZvmKQf/4oaw
+      B9yTcYDlNZx4YfUKnWvgsiyP6/rXES5G3ZTPGrDnGW0xsAXj2dNc5IUdYXLn4UhX
+      irDUSKhzIWEpLub/QIZPcxldDZRXO4lLzNMPLDRpZuNlWc2BAkEA8j6h1IIlZrqz
+      isvZsBGfkka4227lnjsNN/KItvrEcbP6DV7eJTAlb7I+cMMtjqf8uBw6JYCXSKIk
+      FEE8XrWGrwJBAMi2dtJp7iQZWL6wWJqdhrxz5C5aXvCoMW9dI/tSLWGdmcGKKqnB
+      NGHpZaFqfafr1r2lXr+LqVll9/8CdI5uQlUCQEYkHHeLt4inRpVJsR5p++o+0Ae5
+      dIL8Vjd84lkZAwhpNF3quifKaQyOb8X2vZowydwFUFDLiwJc8FVtDi3eIcECQD5w
+      pR5oXfFVAUqxSZ8wCk5uLzpMWuS7LkXaz+rLcdrAUKjo9sTAmi8rkLZajqTCtZdh
+      7svgAtsQ4cmvVdtJadECQQCDyH9MpSf95ST3baNw6WYCc6eEKos2fYg+tmNVGULQ
+      tNl1e9dLvs3nLI4YXq/lJYTqFOt956ZoOfS4AEHUfQcc
+      -----END RSA PRIVATE KEY-----
+    root.crt: |-
+      -----BEGIN CERTIFICATE-----
+      MIICsDCCAhmgAwIBAgIJANJnMUnEzdGaMA0GCSqGSIb3DQEBCwUAMHExCzAJBgNV
+      BAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVG9yb250bzEPMA0GA1UECgwG
+      UmVkSGF0MQ8wDQYDVQQDDAZSZWRIYXQxITAfBgkqhkiG9w0BCQEWEnN6b2JhaXJA
+      cmVkaGF0LmNvbTAeFw0xODA1MTYxNjQyMjVaFw0yODA1MTMxNjQyMjVaMHExCzAJ
+      BgNVBAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVG9yb250bzEPMA0GA1UE
+      CgwGUmVkSGF0MQ8wDQYDVQQDDAZSZWRIYXQxITAfBgkqhkiG9w0BCQEWEnN6b2Jh
+      aXJAcmVkaGF0LmNvbTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAwdeHuHZF
+      0JeBw6K0A5ZN4CHYkTlznuOAniTou/ZPYzpHDZJ40ujvViLbzY1YAyspNqLhGrbV
+      JFo3uaPZKhWp5iurVIDKN/IHuzpnHuQq3jwLclkxAU8ofuYEdxS547JpFF63K21F
+      eP6j3RmgL3bUpFFI0GxMr0Ljm1BiBhQ2gyECAwEAAaNQME4wHQYDVR0OBBYEFCDC
+      uRcEM4uS/mSpYBOrsNG2BdeqMB8GA1UdIwQYMBaAFCDCuRcEM4uS/mSpYBOrsNG2
+      BdeqMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADgYEAK3FXDlNbJrFx2m/8
+      haCp4Z+CLozes5al/biytcXp0gQDkfXVsZMulW63G2Dq2kYK8pbvnG+aPxmKRzBL
+      lUUu1RaU/AD6wz4n/gl+2+ZyQGyRv+00iWlIZ16/ulCshK1NwVobBeRQodeIWM/q
+      wClPpeOsljraXufnvqslw9e4ZNw=
+      -----END CERTIFICATE----- 
 
 parameters:
 - description: The name assigned to all of the frontend objects defined in this template.
