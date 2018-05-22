@@ -24,23 +24,14 @@ RUN sed -i 's/User apache/User 1001/g' /etc/httpd/conf/httpd.conf \
 RUN ln -sf /dev/stdout /etc/httpd/logs/access_log \
  && ln -sf /dev/stderr /etc/httpd/logs/error_log
 
-#COPY CERT /tmp/
-#COPY CERT/frontend.cert /etc/pki/tls/certs/
-
 ADD run.sh /tmp/run.sh
-#RUN chown -v 1001:1001 /tmp/postgresql.key /tmp/postgresql.crt /tmp/root.crt /tmp/frontend.cert && \
-#    chmod 666 /tmp/postgresql.key /tmp/frontend.key && \
 RUN chmod 777 /tmp/run.sh
 
-
 USER 1001
-#RUN cat /tmp/postgresql.key > /tmp/postgresql-user.key && \
-#    chmod 600 /tmp/postgresql-user.key
 
 EXPOSE 8080 8443
 
 COPY index.html /var/www/html/
 COPY db-ssl.php /var/www/html/
 
-#CMD ["httpd", "-D", "FOREGROUND"]
 CMD ["/tmp/run.sh"]
