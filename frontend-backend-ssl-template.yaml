@@ -72,9 +72,6 @@ objects:
       git:
         ref: ${SOURCE_REPOSITORY_REF}
         uri: ${SOURCE_REPOSITORY_URL}
-#        httpProxy: http://10.216.8.124:8081
-#        httpsProxy: https://10.216.8.124:8081
-#        noProxy: 
       type: Git
     strategy:
       dockerStrategy:
@@ -84,7 +81,6 @@ objects:
         from:
           kind: ImageStreamTag
           name: rhel7:latest
-#          namespace: openshift
       type: Source
     triggers:
     - type: ImageChange
@@ -114,7 +110,6 @@ objects:
         - env:
           - name: SERVICE_NAME
             value: ${SERVICE_NAME}-frontend
-#          image: docker-registry.default.svc:5000/openshift/frontend
           image: ${NAME}-frontend
           imagePullPolicy: IfNotPresent
           name: frontend
@@ -146,7 +141,7 @@ objects:
             name: apache-key
         - name: postgres-client-certs
           configMap:
-            defaultMode: 666
+            defaultMode: 0777
             name: postgres-client-certs            
     triggers:
     - imageChangeParams:
@@ -198,9 +193,6 @@ objects:
       git:
         ref: ${SOURCE_REPOSITORY_REF}
         uri: ${SOURCE_REPOSITORY_URL}
-#        httpProxy: http://10.216.8.124:8081
-#        httpsProxy: https://10.216.8.124:8081
-#        noProxy: 
       type: Git
     strategy:
       dockerStrategy:
@@ -210,7 +202,6 @@ objects:
         from:
           kind: ImageStreamTag
           name: rhel7:latest
-#          namespace: openshift
       type: Source
     triggers:
     - type: ImageChange
@@ -240,7 +231,6 @@ objects:
         - env:
           - name: SERVICE_NAME
             value: ${SERVICE_NAME}-backend
-#          image: docker-registry.default.svc:5000/openshift/backend
           image: ${NAME}-backend
           imagePullPolicy: IfNotPresent
           name: backend
@@ -381,7 +371,7 @@ parameters:
 - description: The name assigned to all of the frontend objects defined in this template.
   displayName: Name
   name: NAME
-  value: aci
+  value: ssl
 - description: Maximum amount of memory the container can use.
   displayName: Memory Limit
   name: MEMORY_LIMIT
