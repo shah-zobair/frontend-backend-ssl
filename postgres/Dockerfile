@@ -21,10 +21,8 @@ RUN chmod +x /usr/bin/postgresql-setup && \
     cp -r /var/lib/pgsql/* /BACKUP/ && \
     rm -fr /var/lib/pgsql/*
 
-#COPY postgresql.conf db_entry.sh start_postgres.sh CERT /
 COPY postgresql.conf db_entry.sh start_postgres.sh /
 
-#chown -v postgres.postgres /postgresql.conf /db_entry.sh /server.key /server.crt /root.crt
 RUN chown -v postgres.postgres /postgresql.conf /db_entry.sh && \
     chmod -R 777 /var/lib/pgsql && \
     chmod 777 /start_postgres.sh && \
