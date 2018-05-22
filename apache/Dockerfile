@@ -19,7 +19,7 @@ RUN sed -i 's/User apache/User 1001/g' /etc/httpd/conf/httpd.conf \
  && sed -i 's/Listen 443/Listen 8443/g' /etc/httpd/conf.d/ssl.conf \
  && sed -i 's/VirtualHost _default_:443/VirtualHost _default_:8443/g' /etc/httpd/conf.d/ssl.conf \
  && sed -i 's/SSLCertificateFile \/etc\/pki\/tls\/certs\/localhost.crt/SSLCertificateFile \/etc\/pki\/tls\/certs\/frontend.cert/g' /etc/httpd/conf.d/ssl.conf \
- && sed -i 's/SSLCertificateFile \/etc\/pki\/tls\/private\/localhost.key/SSLCertificateFile \/etc\/pki\/tls\/private\/frontend.key/g' /etc/httpd/conf.d/ssl.conf
+ && sed -i 's/SSLCertificateKeyFile \/etc\/pki\/tls\/private\/localhost.key/SSLCertificateKeyFile \/etc\/pki\/tls\/private\/frontend.key/g' /etc/httpd/conf.d/ssl.conf
 
 RUN ln -sf /dev/stdout /etc/httpd/logs/access_log \
  && ln -sf /dev/stderr /etc/httpd/logs/error_log
