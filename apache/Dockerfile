@@ -26,7 +26,7 @@ RUN ln -sf /dev/stdout /etc/httpd/logs/access_log \
 
 COPY CERT /tmp/
 COPY CERT/frontend.cert /etc/pki/tls/certs/
-COPY CERT/frontend.key /etc/pki/tls/private/
+#COPY CERT/frontend.key /etc/pki/tls/private/
 #ADD CERT/postgresql.key /tmp/postgresql.key
 #ADD CERT/postgresql.crt /tmp/postgresql.crt
 #ADD CERT/root.crt /tmp/root.crt
