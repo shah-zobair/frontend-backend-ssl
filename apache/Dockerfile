@@ -24,16 +24,13 @@ RUN sed -i 's/User apache/User 1001/g' /etc/httpd/conf/httpd.conf \
 RUN ln -sf /dev/stdout /etc/httpd/logs/access_log \
  && ln -sf /dev/stderr /etc/httpd/logs/error_log
 
-COPY CERT /tmp/
-COPY CERT/frontend.cert /etc/pki/tls/certs/
-#COPY CERT/frontend.key /etc/pki/tls/private/
-#ADD CERT/postgresql.key /tmp/postgresql.key
-#ADD CERT/postgresql.crt /tmp/postgresql.crt
-#ADD CERT/root.crt /tmp/root.crt
+#COPY CERT /tmp/
+#COPY CERT/frontend.cert /etc/pki/tls/certs/
+
 ADD run.sh /tmp/run.sh
-RUN chown -v 1001:1001 /tmp/postgresql.key /tmp/postgresql.crt /tmp/root.crt /tmp/frontend.cert && \
-    chmod 666 /tmp/postgresql.key /tmp/frontend.key && \
-    chmod 777 /tmp/run.sh
+#RUN chown -v 1001:1001 /tmp/postgresql.key /tmp/postgresql.crt /tmp/root.crt /tmp/frontend.cert && \
+#    chmod 666 /tmp/postgresql.key /tmp/frontend.key && \
+RUN chmod 777 /tmp/run.sh
 
 
 USER 1001
