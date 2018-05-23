@@ -27,7 +27,7 @@ objects:
   metadata:
     annotations:
       description: Exposes and load balances the application pods
-    name: ${NAME}-frontend
+    name: ${NAME}-frontend-web
   spec:
     ports:
     - name: web
@@ -40,16 +40,71 @@ objects:
   status:
     loadBalancer: {}
 - apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances the application pods
+    name: ${NAME}-frontend-ssl
+  spec:
+    ports:
+    - name: ssl
+      port: 8443
+      targetPort: 8443
+    selector:
+      name: ${NAME}-frontend
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
   kind: Route
   metadata:
-    name: ${NAME}-frontend
+    name: ${NAME}-frontend-web
   spec:
     host: ${APPLICATION_DOMAIN}
     port:
       targetPort: 8080
     to:
       kind: Service
-      name: ${NAME}-frontend
+      name: ${NAME}-frontend-web
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${NAME}-frontend-ssl
+  spec:
+    host: ${APPLICATION_DOMAIN}
+    port:
+      targetPort: 8443
+    to:
+      kind: Service
+      name: ${NAME}-frontend-ssl
+    tls:
+      termination: reencrypt
+      insecureEdgeTerminationPolicy: None
+      destinationCACertificate: |-
+        -----BEGIN CERTIFICATE-----
+        MIID5TCCAs2gAwIBAgIJAI4cWMvhn2+jMA0GCSqGSIb3DQEBCwUAMIGIMQswCQYD
+        VQQGEwJDQTELMAkGA1UECAwCT04xEDAOBgNVBAcMB1Rvcm9udG8xFDASBgNVBAoM
+        C1JlZCBIYXQgSW5jMQswCQYDVQQLDAJTUzEUMBIGA1UEAwwLUmVkIEhhdCBJbmMx
+        ITAfBgkqhkiG9w0BCQEWEnN6b2JhaXJAcmVkaGF0LmNvbTAeFw0xODA1MjIxNDA5
+        MjVaFw0xODA2MjExNDA5MjVaMIGIMQswCQYDVQQGEwJDQTELMAkGA1UECAwCT04x
+        EDAOBgNVBAcMB1Rvcm9udG8xFDASBgNVBAoMC1JlZCBIYXQgSW5jMQswCQYDVQQL
+        DAJTUzEUMBIGA1UEAwwLUmVkIEhhdCBJbmMxITAfBgkqhkiG9w0BCQEWEnN6b2Jh
+        aXJAcmVkaGF0LmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJn
+        kKmsOIKsrA2wdhS/iBE/D3O1fyEOi4itrGLc5EnSRIbdtIBFCBVAEIRzR8WtDouv
+        QzvNreC9GEA+ZJAurb5TDAKyCYvH4x2iNmMwjOIRLjDjqqCqGeDrRd/aRv6l5Ab4
+        5gaU69RVby/nmKWpSHuvoGmRcthaLHCoyJr1JT52E7ww7NslJ7gkW9OTSBbhTfBe
+        DyISNHnmaZ8OMQzK+NZZbePFjheD/7UunJvr/KHL6ojyEcJhe9Doz3QIWcq0S35J
+        j89mvDs95QCKTlQNCDn4BkLA6pO+ehW755k8v47TrpwcL+Oja4j8gQw/3BAsZjIP
+        X6BT3XFk+Xviuqzo5lkCAwEAAaNQME4wHQYDVR0OBBYEFPpEC1+o4T4HPf22Y9Sv
+        P4tJJIBBMB8GA1UdIwQYMBaAFPpEC1+o4T4HPf22Y9SvP4tJJIBBMAwGA1UdEwQF
+        MAMBAf8wDQYJKoZIhvcNAQELBQADggEBAEhg39qC6/CR+G58B1GqlImzBn/5tI0c
+        oRSu2dPRmhoJ6bUclBkiqpq5l9ShD14A5RGT/sH47sB2F6cew+XujKVyZdH6NHku
+        sZjGGZ2v3eivERbfj6DCzNEjwVEj1ksa83jw2nfK7tAwpffhFX2eBlaqXPKmfwYn
+        Pkpm3WBZnvpRyx9NbyazOSwQWyHjIyS6z+fNaTMBs/pdDGR9OUe+EKTbUIjv+R90
+        EJRNv3NOwI/XOzgz84TG9T0DF8DEjlwmmZcyDZEgAOXJT8kLKplf3Sn3TBgSBr+W
+        cMeVe9/tAKTfQKfJ3FphtVVOgZuJX4krEjWn6jJRwr2zpI3H7pXIxJs=
+        -----END CERTIFICATE-----
 - apiVersion: v1
   kind: ImageStream
   metadata:
