@@ -11,15 +11,6 @@ $sslrootcert = '/tmp/certs/root.crt';
 
 $conn = new PDO("pgsql:host=$host;dbname=$dbname;port=$port;sslmode=require;sslcert=$sslcert;sslkey=$sslkey;sslrootcert=$sslrootcert", $dbuser, $dbpass);
 
-
-#$conn = new PDO("pgsql:host=$host;dbname=$dbname", $dbuser, $dbpass);
-
-#$conn = new PDO('pgsql:host=localhost;port=5432;dbname=testing;sslmode=require;sslcert=CERT/CLIENT/postgresql.crt;sslkey=CERT/CLIENT/postgresql.key;sslrootcert=CERT/root.crt;',
-#    'shah', 'shah123', array(
-#      PDO::ATTR_ERRMODE          => PDO::ERRMODE_EXCEPTION,
-#      PDO::ATTR_EMULATE_PREPARES => true,
-#  ));
-
 }
 catch (PDOException $e)
 {
