@@ -1,0 +1,216 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: backend-ssl
+metadata:
+  annotations:
+    description: Template for deploying Apache and Postgres on RHEL
+    iconClass: icon-postgres-database
+    tags: quickstart,oracle
+  name: frontend-backend-ssl
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: rhel7
+  spec:
+    tags:
+    - from:
+        kind: DockerImage
+        name: registry.access.redhat.com/rhel7
+      name: latest
+      importPolicy:
+        scheduled: true
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances the application pods
+    name: backend
+  spec:
+    ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+    selector:
+      name: ${NAME}-backend
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application image
+    name: ${NAME}-backend
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      description: Defines how to build the application
+    name: ${NAME}-backend
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${NAME}-backend:latest
+    source:
+      contextDir: ${CONTEXT_DIR_BACKEND}
+      git:
+        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${SOURCE_REPOSITORY_URL}
+      type: Git
+    strategy:
+      dockerStrategy:
+        env:
+        - name: GIT_SSL_NO_VERIFY
+          value: "true"
+        from:
+          kind: ImageStreamTag
+          name: rhel7:latest
+      type: Source
+    triggers:
+    - type: ImageChange
+    - type: ConfigChange
+    - github:
+        secret: ${GITHUB_WEBHOOK_SECRET}
+      type: GitHub
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Defines how to deploy the application server
+    name: ${NAME}-backend
+  spec:
+    replicas: 1
+    selector:
+      name: ${NAME}-backend
+    strategy:
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          name: ${NAME}-backend
+        name: ${NAME}-backend
+      spec:
+        containers:
+        - env:
+          - name: SERVICE_NAME
+            value: ${SERVICE_NAME}-backend
+          image: ${NAME}-backend
+          imagePullPolicy: IfNotPresent
+          name: backend
+          ports:
+          - containerPort: 3306
+            name: web
+          resources:
+            limits:
+              memory: ${MEMORY_LIMIT}
+          volumeMounts:
+          - mountPath: /tmp/certs
+            name: postgres-server-certs   
+        volumes:
+        - name: postgres-server-certs
+          configMap:
+            defaultMode: 0777
+            name: postgres-server-certs
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - backend
+        from:
+          kind: ImageStreamTag
+          name: ${NAME}-backend:latest
+        lastTriggeredImage: ""
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: postgres-server-certs
+  data:
+    server.crt: |-
+      -----BEGIN CERTIFICATE-----
+      MIICsDCCAhmgAwIBAgIJANJnMUnEzdGaMA0GCSqGSIb3DQEBCwUAMHExCzAJBgNV
+      BAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVG9yb250bzEPMA0GA1UECgwG
+      UmVkSGF0MQ8wDQYDVQQDDAZSZWRIYXQxITAfBgkqhkiG9w0BCQEWEnN6b2JhaXJA
+      cmVkaGF0LmNvbTAeFw0xODA1MTYxNjQyMjVaFw0yODA1MTMxNjQyMjVaMHExCzAJ
+      BgNVBAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVG9yb250bzEPMA0GA1UE
+      CgwGUmVkSGF0MQ8wDQYDVQQDDAZSZWRIYXQxITAfBgkqhkiG9w0BCQEWEnN6b2Jh
+      aXJAcmVkaGF0LmNvbTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAwdeHuHZF
+      0JeBw6K0A5ZN4CHYkTlznuOAniTou/ZPYzpHDZJ40ujvViLbzY1YAyspNqLhGrbV
+      JFo3uaPZKhWp5iurVIDKN/IHuzpnHuQq3jwLclkxAU8ofuYEdxS547JpFF63K21F
+      eP6j3RmgL3bUpFFI0GxMr0Ljm1BiBhQ2gyECAwEAAaNQME4wHQYDVR0OBBYEFCDC
+      uRcEM4uS/mSpYBOrsNG2BdeqMB8GA1UdIwQYMBaAFCDCuRcEM4uS/mSpYBOrsNG2
+      BdeqMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADgYEAK3FXDlNbJrFx2m/8
+      haCp4Z+CLozes5al/biytcXp0gQDkfXVsZMulW63G2Dq2kYK8pbvnG+aPxmKRzBL
+      lUUu1RaU/AD6wz4n/gl+2+ZyQGyRv+00iWlIZ16/ulCshK1NwVobBeRQodeIWM/q
+      wClPpeOsljraXufnvqslw9e4ZNw=
+      -----END CERTIFICATE-----     
+    server.key: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIICXQIBAAKBgQDB14e4dkXQl4HDorQDlk3gIdiROXOe44CeJOi79k9jOkcNknjS
+      6O9WItvNjVgDKyk2ouEattUkWje5o9kqFanmK6tUgMo38ge7Omce5CrePAtyWTEB
+      Tyh+5gR3FLnjsmkUXrcrbUV4/qPdGaAvdtSkUUjQbEyvQuObUGIGFDaDIQIDAQAB
+      AoGANeVleSZ5duwJSon8n1q1QHJosshUm4MKCe6dP1XW8PINO3rUWWAm275Jezen
+      lwnzJZvYFwNq8/aZs+YYxZjMahSWyF78ZSFF2ClCdTqXFP/W3L7GRcpOdemIwE3j
+      XZOuJJNnpcqqhothY3TxVCvI9lmHZnSgQwlD9wACU03xmqECQQD1l48OA29hkSio
+      NMSzqwuTDAPMm6Y33HkNzK27al6z573ey7SaT/KPgVSx6G00bxX4nDJqR7S9u86v
+      gCbQ2zSdAkEAyg6IFfVXDa6NMFnhEqB6edn4F+9KDjfC2/lFXTFZkXYRKRDm38Rr
+      zHLv8PcMOboENc7sy0ZPm3N9yT2JgSjHVQJBAJbv3LXKGqwmIIywUavylZx8J+Ga
+      T5/JWoTGpIeoqid7Z9AD9i1YsUTNQZZNuMAe/avbo4h6JXTudeqaokB+WGkCQQCu
+      F9UzLj+Cf1oRRe/CT9kXMjIr1TY2h97yD5WvVTz6MwNYIcL7HE9RSdrpAMNc3aSR
+      BChMgNlIdDr18HqQeaU9AkA0TmluAZ1z5MvL4gsxTf5AnOT2kQwwTjRmvwR6u+jI
+      23c0cmBkQZbK/b94u8Q9fS7GzEp6gL9yqGQCJ0dh+dIX
+      -----END RSA PRIVATE KEY-----    
+    root.crt: |-
+      -----BEGIN CERTIFICATE-----
+      MIICsDCCAhmgAwIBAgIJANJnMUnEzdGaMA0GCSqGSIb3DQEBCwUAMHExCzAJBgNV
+      BAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVG9yb250bzEPMA0GA1UECgwG
+      UmVkSGF0MQ8wDQYDVQQDDAZSZWRIYXQxITAfBgkqhkiG9w0BCQEWEnN6b2JhaXJA
+      cmVkaGF0LmNvbTAeFw0xODA1MTYxNjQyMjVaFw0yODA1MTMxNjQyMjVaMHExCzAJ
+      BgNVBAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVG9yb250bzEPMA0GA1UE
+      CgwGUmVkSGF0MQ8wDQYDVQQDDAZSZWRIYXQxITAfBgkqhkiG9w0BCQEWEnN6b2Jh
+      aXJAcmVkaGF0LmNvbTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAwdeHuHZF
+      0JeBw6K0A5ZN4CHYkTlznuOAniTou/ZPYzpHDZJ40ujvViLbzY1YAyspNqLhGrbV
+      JFo3uaPZKhWp5iurVIDKN/IHuzpnHuQq3jwLclkxAU8ofuYEdxS547JpFF63K21F
+      eP6j3RmgL3bUpFFI0GxMr0Ljm1BiBhQ2gyECAwEAAaNQME4wHQYDVR0OBBYEFCDC
+      uRcEM4uS/mSpYBOrsNG2BdeqMB8GA1UdIwQYMBaAFCDCuRcEM4uS/mSpYBOrsNG2
+      BdeqMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADgYEAK3FXDlNbJrFx2m/8
+      haCp4Z+CLozes5al/biytcXp0gQDkfXVsZMulW63G2Dq2kYK8pbvnG+aPxmKRzBL
+      lUUu1RaU/AD6wz4n/gl+2+ZyQGyRv+00iWlIZ16/ulCshK1NwVobBeRQodeIWM/q
+      wClPpeOsljraXufnvqslw9e4ZNw=
+      -----END CERTIFICATE-----     
+parameters:
+- description: The name assigned to all of the frontend objects defined in this template.
+  displayName: Name
+  name: NAME
+  value: backend
+- description: Maximum amount of memory the container can use.
+  displayName: Memory Limit
+  name: MEMORY_LIMIT
+  value: 1024Mi
+- description: The exposed hostname that will route to the Application service, if
+    left blank a value will be defaulted.
+  displayName: Application Hostname
+  name: APPLICATION_DOMAIN
+- description: The URL of the repository with your application source code.
+  displayName: Git Repository URL
+  name: SOURCE_REPOSITORY_URL
+  value: https://github.com/shah-zobair/frontend-backend-ssl.git
+- description: Set this to a branch name, tag or other ref of your repository if you
+    are not using the default branch.
+  displayName: Git Reference
+  name: SOURCE_REPOSITORY_REF
+- description: Set this to the relative path to your project if it is not in the root
+    of your repository.
+  displayName: Context Directory for backend (postgres)
+  name: CONTEXT_DIR_BACKEND
+  value: postgres
+- description: A secret string used to configure the GitHub webhook.
+  displayName: GitHub Webhook Secret
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression
+  name: GITHUB_WEBHOOK_SECRET
