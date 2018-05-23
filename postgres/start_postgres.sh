@@ -23,8 +23,10 @@ fi
 cp /postgresql.conf /var/lib/pgsql/data/postgresql.conf
 cp /tmp/certs/root.crt /var/lib/pgsql/data/root.crt
 cp /tmp/certs/server.crt /var/lib/pgsql/data/server.crt
+cp /tmp/certs/server.crt /etc/pki/tls/certs/
 cp /tmp/certs/server.key /var/lib/pgsql/data/server.key
-chmod 600 /var/lib/pgsql/data/server.key 
+cp /tmp/certs/server.key /etc/pki/tls/private/
+chmod 600 /var/lib/pgsql/data/server.key /etc/pki/tls/private/server.key
 
 #echo "host    all             all             0.0.0.0/0               md5" >> /var/lib/pgsql/data/pg_hba.conf
 #echo "hostssl all         postgres    0.0.0.0/0             md5 clientcert=1" >> /var/lib/pgsql/data/pg_hba.conf
