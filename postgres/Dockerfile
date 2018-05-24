@@ -27,9 +27,9 @@ RUN chown -v postgres.postgres /postgresql.conf /db_entry.sh && \
     chmod -R 777 /var/lib/pgsql && \
     chmod 777 /start_postgres.sh && \
     chmod 660 /etc/passwd && \
-    chmod 777 /etc /etc/pki/tls/certs /etc/pki/tls/private /etc/pki/ca-trust/extracted && \
+    chmod 777 /etc /etc/pki/tls/certs /etc/pki/tls/private  && \
     chown -R postgres.postgres /BACKUP/* && \
-    chmod -R 777 /BACKUP/ /var/run/postgresql/
+    chmod -R 777 /BACKUP/ /var/run/postgresql/ /etc/pki/ca-trust/extracted/
 
 EXPOSE 5432
 USER 1001
