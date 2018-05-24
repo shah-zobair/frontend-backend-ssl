@@ -22,6 +22,7 @@ fi
 
 cp /postgresql.conf /var/lib/pgsql/data/postgresql.conf
 cp /tmp/certs/root.crt /var/lib/pgsql/data/root.crt
+cp /tmp/certs/root.crt /etc/pki/ca-trust/source/anchors/
 cp /tmp/certs/server.crt /var/lib/pgsql/data/server.crt
 cp /tmp/certs/server.crt /etc/pki/tls/certs/
 cp /tmp/certs/server.key /var/lib/pgsql/data/server.key
