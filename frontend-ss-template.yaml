@@ -1,0 +1,415 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: frontend-backend-ssl
+metadata:
+  annotations:
+    description: Template for deploying Apache and Postgres on RHEL
+    iconClass: icon-postgres-database
+    tags: quickstart,oracle
+  name: frontend-backend-ssl
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: rhel7
+  spec:
+    tags:
+    - from:
+        kind: DockerImage
+        name: registry.access.redhat.com/rhel7
+      name: latest
+      importPolicy:
+        scheduled: true
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances the application pods
+    name: ${NAME}-frontend-web
+  spec:
+    ports:
+    - name: web
+      port: 8080
+      targetPort: 8080
+    selector:
+      name: ${NAME}-frontend
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances the application pods
+    name: ${NAME}-frontend-ssl
+  spec:
+    ports:
+    - name: ssl
+      port: 8443
+      targetPort: 8443
+    selector:
+      name: ${NAME}-frontend
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${NAME}-frontend-web
+  spec:
+    host: ${APPLICATION_DOMAIN}
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: ${NAME}-frontend-web
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${NAME}-frontend-ssl
+  spec:
+    host: ${APPLICATION_DOMAIN}
+    port:
+      targetPort: 8443
+    to:
+      kind: Service
+      name: ${NAME}-frontend-ssl
+    tls:
+      termination: reencrypt
+      insecureEdgeTerminationPolicy: None
+      destinationCACertificate: |-
+        -----BEGIN CERTIFICATE-----
+        MIID5TCCAs2gAwIBAgIJAI4cWMvhn2+jMA0GCSqGSIb3DQEBCwUAMIGIMQswCQYD
+        VQQGEwJDQTELMAkGA1UECAwCT04xEDAOBgNVBAcMB1Rvcm9udG8xFDASBgNVBAoM
+        C1JlZCBIYXQgSW5jMQswCQYDVQQLDAJTUzEUMBIGA1UEAwwLUmVkIEhhdCBJbmMx
+        ITAfBgkqhkiG9w0BCQEWEnN6b2JhaXJAcmVkaGF0LmNvbTAeFw0xODA1MjIxNDA5
+        MjVaFw0xODA2MjExNDA5MjVaMIGIMQswCQYDVQQGEwJDQTELMAkGA1UECAwCT04x
+        EDAOBgNVBAcMB1Rvcm9udG8xFDASBgNVBAoMC1JlZCBIYXQgSW5jMQswCQYDVQQL
+        DAJTUzEUMBIGA1UEAwwLUmVkIEhhdCBJbmMxITAfBgkqhkiG9w0BCQEWEnN6b2Jh
+        aXJAcmVkaGF0LmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJn
+        kKmsOIKsrA2wdhS/iBE/D3O1fyEOi4itrGLc5EnSRIbdtIBFCBVAEIRzR8WtDouv
+        QzvNreC9GEA+ZJAurb5TDAKyCYvH4x2iNmMwjOIRLjDjqqCqGeDrRd/aRv6l5Ab4
+        5gaU69RVby/nmKWpSHuvoGmRcthaLHCoyJr1JT52E7ww7NslJ7gkW9OTSBbhTfBe
+        DyISNHnmaZ8OMQzK+NZZbePFjheD/7UunJvr/KHL6ojyEcJhe9Doz3QIWcq0S35J
+        j89mvDs95QCKTlQNCDn4BkLA6pO+ehW755k8v47TrpwcL+Oja4j8gQw/3BAsZjIP
+        X6BT3XFk+Xviuqzo5lkCAwEAAaNQME4wHQYDVR0OBBYEFPpEC1+o4T4HPf22Y9Sv
+        P4tJJIBBMB8GA1UdIwQYMBaAFPpEC1+o4T4HPf22Y9SvP4tJJIBBMAwGA1UdEwQF
+        MAMBAf8wDQYJKoZIhvcNAQELBQADggEBAEhg39qC6/CR+G58B1GqlImzBn/5tI0c
+        oRSu2dPRmhoJ6bUclBkiqpq5l9ShD14A5RGT/sH47sB2F6cew+XujKVyZdH6NHku
+        sZjGGZ2v3eivERbfj6DCzNEjwVEj1ksa83jw2nfK7tAwpffhFX2eBlaqXPKmfwYn
+        Pkpm3WBZnvpRyx9NbyazOSwQWyHjIyS6z+fNaTMBs/pdDGR9OUe+EKTbUIjv+R90
+        EJRNv3NOwI/XOzgz84TG9T0DF8DEjlwmmZcyDZEgAOXJT8kLKplf3Sn3TBgSBr+W
+        cMeVe9/tAKTfQKfJ3FphtVVOgZuJX4krEjWn6jJRwr2zpI3H7pXIxJs=
+        -----END CERTIFICATE-----
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application image
+    name: ${NAME}-frontend
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      description: Defines how to build the application
+    name: ${NAME}-frontend
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${NAME}-frontend:latest
+    source:
+      contextDir: ${CONTEXT_DIR}
+      git:
+        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${SOURCE_REPOSITORY_URL}
+      type: Git
+    strategy:
+      dockerStrategy:
+        env:
+        - name: GIT_SSL_NO_VERIFY
+          value: "true"
+        from:
+          kind: ImageStreamTag
+          name: rhel7:latest
+      type: Source
+    triggers:
+    - type: ImageChange
+    - type: ConfigChange
+    - github:
+        secret: ${GITHUB_WEBHOOK_SECRET}
+      type: GitHub
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Defines how to deploy the application server
+    name: ${NAME}-frontend
+  spec:
+    replicas: 1
+    selector:
+      name: ${NAME}-frontend
+    strategy:
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          name: ${NAME}-frontend
+        name: ${NAME}-frontend
+      spec:
+        containers:
+        - env:
+          - name: SERVICE_NAME
+            value: ${SERVICE_NAME}-frontend
+          image: ${NAME}-frontend
+          imagePullPolicy: IfNotPresent
+          name: frontend
+          ports:
+          - containerPort: 8080
+            name: web
+          resources:
+            limits:
+              memory: ${MEMORY_LIMIT}
+          volumeMounts:
+          - mountPath: /etc/pki/tls/certs
+            name: apache-cert
+          - mountPath: /etc/pki/tls/private
+            name: apache-key
+          - mountPath: /tmp/certs
+            name: postgres-client-certs   
+        volumes:
+        - name: apache-cert
+          configMap:
+            defaultMode: 420
+            name: apache-cert
+        - name: apache-key
+          configMap:
+            defaultMode: 400
+            name: apache-key
+        - name: postgres-client-certs
+          configMap:
+            defaultMode: 0777
+            name: postgres-client-certs            
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - frontend
+        from:
+          kind: ImageStreamTag
+          name: ${NAME}-frontend:latest
+        lastTriggeredImage: ""
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: apache-cert
+  data:
+    frontend.cert: |
+      -----BEGIN CERTIFICATE-----
+      MIIDaDCCAlACCQC07fAVNJUxZTANBgkqhkiG9w0BAQsFADCBiDELMAkGA1UEBhMC
+      Q0ExCzAJBgNVBAgMAk9OMRAwDgYDVQQHDAdUb3JvbnRvMRQwEgYDVQQKDAtSZWQg
+      SGF0IEluYzELMAkGA1UECwwCU1MxFDASBgNVBAMMC1JlZCBIYXQgSW5jMSEwHwYJ
+      KoZIhvcNAQkBFhJzem9iYWlyQHJlZGhhdC5jb20wHhcNMTgwNTIyMTQyNDM4WhcN
+      MTgwNjIxMTQyNDM4WjBjMQswCQYDVQQGEwJDQTELMAkGA1UECAwCT04xEDAOBgNV
+      BAcMB1Rvcm9udG8xCzAJBgNVBAoMAlNTMSgwJgYDVQQDDB8qLmU4Y2EuZW5naW50
+      Lm9wZW5zaGlmdGFwcHMuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
+      AQEA8Tt7yM/tt42BibDuvepStg1QdC0dzvUBg6Yb8G42DLEI2Wx1JITt0z88xrzj
+      mu4A7bhWjcAg7ubaFDfi5RzGIapBURYE7SCymXraUdcMVaDJbxNLV3UUuyO+V6qN
+      dD9pe6dQYCmzvyffMCtVcTPUHeSLFD/51S69WFugt19tLFVeK/7QOcwsJ1sW+QEL
+      u6ls+Ih5ViHc7JHjXFrQanCSjaFXXrwDBJ8fLTHJuzegbD30/IpoqKUjqVGHxn6L
+      uJw28ZutcE9BucSDf7YPKlfLIH9HOLokJGRfJYYzgP+BhjromHHi2dLbmCwfhLXD
+      NlhfIRP5HS2zoDPCiqEEH9rgPwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCwbubQ
+      R0wZH3HovymnFu5gqN9f/SjFQXF025ZRhH433ouyHFOCRqrg6a64NyIQ5o8CKVyd
+      7JTSUqM8BsG2y/bIzeIIsTqesxYqu3oLTDf7LDrozC2VBwD3ga32oow1KKCqER0R
+      7Ju4+YBLq9XgoNJDcUd1IgQEb6JIFqbhc9nIFQUnEZHwmUKBQbVcxw71C4Ufbett
+      PzyExKT6m/fxYg71V7eb/nyKprwLSvZbbEEYqZd7RV2sRyfYuIiAQdyhr97oGk15
+      TJostDfTO4J9FN6Qvm9eHz4+kF+3TVMnZS75Hr4XVWsDXm6wR1vS+DFHKL+TH4AQ
+      GO0WaexSWrfC4Jfb
+      -----END CERTIFICATE-----
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: apache-key
+  data:
+    frontend.key: |
+      -----BEGIN PRIVATE KEY-----
+      MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDxO3vIz+23jYGJ
+      sO696lK2DVB0LR3O9QGDphvwbjYMsQjZbHUkhO3TPzzGvOOa7gDtuFaNwCDu5toU
+      N+LlHMYhqkFRFgTtILKZetpR1wxVoMlvE0tXdRS7I75Xqo10P2l7p1BgKbO/J98w
+      K1VxM9Qd5IsUP/nVLr1YW6C3X20sVV4r/tA5zCwnWxb5AQu7qWz4iHlWIdzskeNc
+      WtBqcJKNoVdevAMEnx8tMcm7N6BsPfT8imiopSOpUYfGfou4nDbxm61wT0G5xIN/
+      tg8qV8sgf0c4uiQkZF8lhjOA/4GGOuiYceLZ0tuYLB+EtcM2WF8hE/kdLbOgM8KK
+      oQQf2uA/AgMBAAECggEAZaWZ6CjtUt22iq1aO/4jsgB0OS/VkqIcbDuvJCVccwaZ
+      4vvXdHbqu4u28UsgYOUO0RxOpFYjymbN150g50ezmPXjpeYwVzbi6tcgbUG/OcmR
+      d1Na+NQl0yEhkFEWX7hkmy0KKisISXDkk6h+zT94jswBapv2isSyFiwt0XbNStMw
+      c6oCQ/vQaxv++6z8AJAH+4atpoXsDpUn3NEFcGqG2eRjqc6jI2zS9MSRSknaDsCG
+      AnV8dS5wg1JVXa2aWG3xS3rC6WhfB0ZKgIETN2cZ/1gPb1SORg66OuLoK2LCRy6x
+      xv4deJPskfwDhfwfpqy3DSU1OAUOVYWBvIKOh9jX4QKBgQD8AIx6ImW+zXWCubrU
+      izPA2sDei5zB1YELwIiIUq6s4F/DZRLUHuCjROQmYy1fzg5+x0loxFVMWjcaZPa9
+      nl4IW4JiWoSM1U+Jym8Iv/SC3Y0PgbMPxX1ZsqiHYqxy4jvldqavd1/AXkPJ0GoJ
+      3zG0IMNpmgfdv6l8g+dMFqL8cQKBgQD1DzIX9jYr4CVSK9zOQ0ATVhJ/epX9sHD7
+      CkTlxIdco5NiLFkkys4LnEqBEEbzh5HXNB5K0VPD5i7haILmn0m1IcPV+Lerq/Xr
+      HleJwMsnDRNl7uQF22JjWfSNDQbUlyNx6k/WEoRppQxtwGM35pi96frmQKrx296O
+      k19COZi/rwKBgCUSS5gYAVG9VeEiQ3rK85UWWTMj5K6bIv3AmBU93JZv94Z+EvQD
+      itZZ5xpCksU6QeWimYkBAO9Xgi2u1qF0b67ZD2g6mq9BHg9OKWFnI6gwwXSbhuT2
+      D4engaVQ/b90yozqFIFRlVNuSpigwUisfdpay4R4dVnIvT0lBlyqI9XxAoGAAYOv
+      hpBh81F2SZS1z5yAx93PTXRfeurdN9/vXxAg2gS0w3WMs3qBXXcAyt1j4ttinlbX
+      HRVAFETW41O3A1/Wn8TupeLcl7X/Vg2g8tv7JWmiRg384MBjUkPbDAgZk7S/ZlPR
+      XHxOzyxS8FaxBkZpiTrp7wRVShtWu8DTZOBgPkcCgYAdSHCSa/hRG0NmfWXZxGbd
+      Eaxa4I+hRhqXP+HnBr1/1Ajc846jC7zqZY4pf0eRfNkIdbmtEJL4fIgAOByE98xn
+      O66d4Kvzrf5he5Bm/St2djutVORAIz3wqvu+PXCBrcg9JrwpcqOT1sgSUAI5bDgD
+      lU3kR1r1zQvuF3OysxYQ3g==
+      -----END PRIVATE KEY-----
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: postgres-client-certs
+  data:
+    postgresql.crt: |-
+      -----BEGIN CERTIFICATE-----
+      MIICNDCCAZ0CCQDZ81GZP/xXVTANBgkqhkiG9w0BAQsFADBxMQswCQYDVQQGEwJD
+      QTELMAkGA1UECAwCT04xEDAOBgNVBAcMB1Rvcm9udG8xDzANBgNVBAoMBlJlZEhh
+      dDEPMA0GA1UEAwwGUmVkSGF0MSEwHwYJKoZIhvcNAQkBFhJzem9iYWlyQHJlZGhh
+      dC5jb20wHhcNMTgwNTE2MjA0NDA3WhcNMTgwNjE1MjA0NDA3WjBMMQswCQYDVQQG
+      EwJDQTELMAkGA1UECAwCT04xEDAOBgNVBAcMB1Rvcm9udG8xDzANBgNVBAoMBlJl
+      ZEhhdDENMAsGA1UEAwwEc2hhaDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA
+      ve2XZQz3e+xM1GbKXQCN6DPTi0H6iHYGSSFBmKEuYAA/LGUBOzevoYm0ZJzZ50Z8
+      dtEJh1Jos6c/14Ka9R6TvzH5U8kIhrP90G9Gnj12PoNiqP7D4CQQL4YO1vBSpllq
+      bk6/omEU8W+1OlN+axBdX+DfXAr8zyXuDqQBdzAw1hsCAwEAATANBgkqhkiG9w0B
+      AQsFAAOBgQBAj7pcRlwvJuhcAxE31Y6Lh+sdgIbPLGmXw7ahgG59SIQJFoLQQf5j
+      MLiuuOBtR966CvklMV4Kn2s6OFaQl4N/KYrERRxp2Pr0iS//KZHaZGBayRMowH49
+      92rDBqKIxZ6VbfZf6vGIvV/X6GEmT0Sn95VC66KJ3xaiC/42z5D1zg==
+      -----END CERTIFICATE-----
+    postgresql.key: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIICXQIBAAKBgQC97ZdlDPd77EzUZspdAI3oM9OLQfqIdgZJIUGYoS5gAD8sZQE7
+      N6+hibRknNnnRnx20QmHUmizpz/Xgpr1HpO/MflTyQiGs/3Qb0aePXY+g2Ko/sPg
+      JBAvhg7W8FKmWWpuTr+iYRTxb7U6U35rEF1f4N9cCvzPJe4OpAF3MDDWGwIDAQAB
+      AoGBAIpo6zupB3I38oWXo0HDdacSnceOfZWU7V+97J/eVn1/sIoZ0ZvmKQf/4oaw
+      B9yTcYDlNZx4YfUKnWvgsiyP6/rXES5G3ZTPGrDnGW0xsAXj2dNc5IUdYXLn4UhX
+      irDUSKhzIWEpLub/QIZPcxldDZRXO4lLzNMPLDRpZuNlWc2BAkEA8j6h1IIlZrqz
+      isvZsBGfkka4227lnjsNN/KItvrEcbP6DV7eJTAlb7I+cMMtjqf8uBw6JYCXSKIk
+      FEE8XrWGrwJBAMi2dtJp7iQZWL6wWJqdhrxz5C5aXvCoMW9dI/tSLWGdmcGKKqnB
+      NGHpZaFqfafr1r2lXr+LqVll9/8CdI5uQlUCQEYkHHeLt4inRpVJsR5p++o+0Ae5
+      dIL8Vjd84lkZAwhpNF3quifKaQyOb8X2vZowydwFUFDLiwJc8FVtDi3eIcECQD5w
+      pR5oXfFVAUqxSZ8wCk5uLzpMWuS7LkXaz+rLcdrAUKjo9sTAmi8rkLZajqTCtZdh
+      7svgAtsQ4cmvVdtJadECQQCDyH9MpSf95ST3baNw6WYCc6eEKos2fYg+tmNVGULQ
+      tNl1e9dLvs3nLI4YXq/lJYTqFOt956ZoOfS4AEHUfQcc
+      -----END RSA PRIVATE KEY-----
+    root.crt: |-
+      -----BEGIN CERTIFICATE-----
+      MIICsDCCAhmgAwIBAgIJANJnMUnEzdGaMA0GCSqGSIb3DQEBCwUAMHExCzAJBgNV
+      BAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVG9yb250bzEPMA0GA1UECgwG
+      UmVkSGF0MQ8wDQYDVQQDDAZSZWRIYXQxITAfBgkqhkiG9w0BCQEWEnN6b2JhaXJA
+      cmVkaGF0LmNvbTAeFw0xODA1MTYxNjQyMjVaFw0yODA1MTMxNjQyMjVaMHExCzAJ
+      BgNVBAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVG9yb250bzEPMA0GA1UE
+      CgwGUmVkSGF0MQ8wDQYDVQQDDAZSZWRIYXQxITAfBgkqhkiG9w0BCQEWEnN6b2Jh
+      aXJAcmVkaGF0LmNvbTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAwdeHuHZF
+      0JeBw6K0A5ZN4CHYkTlznuOAniTou/ZPYzpHDZJ40ujvViLbzY1YAyspNqLhGrbV
+      JFo3uaPZKhWp5iurVIDKN/IHuzpnHuQq3jwLclkxAU8ofuYEdxS547JpFF63K21F
+      eP6j3RmgL3bUpFFI0GxMr0Ljm1BiBhQ2gyECAwEAAaNQME4wHQYDVR0OBBYEFCDC
+      uRcEM4uS/mSpYBOrsNG2BdeqMB8GA1UdIwQYMBaAFCDCuRcEM4uS/mSpYBOrsNG2
+      BdeqMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADgYEAK3FXDlNbJrFx2m/8
+      haCp4Z+CLozes5al/biytcXp0gQDkfXVsZMulW63G2Dq2kYK8pbvnG+aPxmKRzBL
+      lUUu1RaU/AD6wz4n/gl+2+ZyQGyRv+00iWlIZ16/ulCshK1NwVobBeRQodeIWM/q
+      wClPpeOsljraXufnvqslw9e4ZNw=
+      -----END CERTIFICATE----- 
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: postgres-server-certs
+  data:
+    server.crt: |-
+      -----BEGIN CERTIFICATE-----
+      MIICsDCCAhmgAwIBAgIJANJnMUnEzdGaMA0GCSqGSIb3DQEBCwUAMHExCzAJBgNV
+      BAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVG9yb250bzEPMA0GA1UECgwG
+      UmVkSGF0MQ8wDQYDVQQDDAZSZWRIYXQxITAfBgkqhkiG9w0BCQEWEnN6b2JhaXJA
+      cmVkaGF0LmNvbTAeFw0xODA1MTYxNjQyMjVaFw0yODA1MTMxNjQyMjVaMHExCzAJ
+      BgNVBAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVG9yb250bzEPMA0GA1UE
+      CgwGUmVkSGF0MQ8wDQYDVQQDDAZSZWRIYXQxITAfBgkqhkiG9w0BCQEWEnN6b2Jh
+      aXJAcmVkaGF0LmNvbTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAwdeHuHZF
+      0JeBw6K0A5ZN4CHYkTlznuOAniTou/ZPYzpHDZJ40ujvViLbzY1YAyspNqLhGrbV
+      JFo3uaPZKhWp5iurVIDKN/IHuzpnHuQq3jwLclkxAU8ofuYEdxS547JpFF63K21F
+      eP6j3RmgL3bUpFFI0GxMr0Ljm1BiBhQ2gyECAwEAAaNQME4wHQYDVR0OBBYEFCDC
+      uRcEM4uS/mSpYBOrsNG2BdeqMB8GA1UdIwQYMBaAFCDCuRcEM4uS/mSpYBOrsNG2
+      BdeqMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADgYEAK3FXDlNbJrFx2m/8
+      haCp4Z+CLozes5al/biytcXp0gQDkfXVsZMulW63G2Dq2kYK8pbvnG+aPxmKRzBL
+      lUUu1RaU/AD6wz4n/gl+2+ZyQGyRv+00iWlIZ16/ulCshK1NwVobBeRQodeIWM/q
+      wClPpeOsljraXufnvqslw9e4ZNw=
+      -----END CERTIFICATE-----     
+    server.key: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIICXQIBAAKBgQDB14e4dkXQl4HDorQDlk3gIdiROXOe44CeJOi79k9jOkcNknjS
+      6O9WItvNjVgDKyk2ouEattUkWje5o9kqFanmK6tUgMo38ge7Omce5CrePAtyWTEB
+      Tyh+5gR3FLnjsmkUXrcrbUV4/qPdGaAvdtSkUUjQbEyvQuObUGIGFDaDIQIDAQAB
+      AoGANeVleSZ5duwJSon8n1q1QHJosshUm4MKCe6dP1XW8PINO3rUWWAm275Jezen
+      lwnzJZvYFwNq8/aZs+YYxZjMahSWyF78ZSFF2ClCdTqXFP/W3L7GRcpOdemIwE3j
+      XZOuJJNnpcqqhothY3TxVCvI9lmHZnSgQwlD9wACU03xmqECQQD1l48OA29hkSio
+      NMSzqwuTDAPMm6Y33HkNzK27al6z573ey7SaT/KPgVSx6G00bxX4nDJqR7S9u86v
+      gCbQ2zSdAkEAyg6IFfVXDa6NMFnhEqB6edn4F+9KDjfC2/lFXTFZkXYRKRDm38Rr
+      zHLv8PcMOboENc7sy0ZPm3N9yT2JgSjHVQJBAJbv3LXKGqwmIIywUavylZx8J+Ga
+      T5/JWoTGpIeoqid7Z9AD9i1YsUTNQZZNuMAe/avbo4h6JXTudeqaokB+WGkCQQCu
+      F9UzLj+Cf1oRRe/CT9kXMjIr1TY2h97yD5WvVTz6MwNYIcL7HE9RSdrpAMNc3aSR
+      BChMgNlIdDr18HqQeaU9AkA0TmluAZ1z5MvL4gsxTf5AnOT2kQwwTjRmvwR6u+jI
+      23c0cmBkQZbK/b94u8Q9fS7GzEp6gL9yqGQCJ0dh+dIX
+      -----END RSA PRIVATE KEY-----    
+    root.crt: |-
+      -----BEGIN CERTIFICATE-----
+      MIICsDCCAhmgAwIBAgIJANJnMUnEzdGaMA0GCSqGSIb3DQEBCwUAMHExCzAJBgNV
+      BAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVG9yb250bzEPMA0GA1UECgwG
+      UmVkSGF0MQ8wDQYDVQQDDAZSZWRIYXQxITAfBgkqhkiG9w0BCQEWEnN6b2JhaXJA
+      cmVkaGF0LmNvbTAeFw0xODA1MTYxNjQyMjVaFw0yODA1MTMxNjQyMjVaMHExCzAJ
+      BgNVBAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVG9yb250bzEPMA0GA1UE
+      CgwGUmVkSGF0MQ8wDQYDVQQDDAZSZWRIYXQxITAfBgkqhkiG9w0BCQEWEnN6b2Jh
+      aXJAcmVkaGF0LmNvbTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAwdeHuHZF
+      0JeBw6K0A5ZN4CHYkTlznuOAniTou/ZPYzpHDZJ40ujvViLbzY1YAyspNqLhGrbV
+      JFo3uaPZKhWp5iurVIDKN/IHuzpnHuQq3jwLclkxAU8ofuYEdxS547JpFF63K21F
+      eP6j3RmgL3bUpFFI0GxMr0Ljm1BiBhQ2gyECAwEAAaNQME4wHQYDVR0OBBYEFCDC
+      uRcEM4uS/mSpYBOrsNG2BdeqMB8GA1UdIwQYMBaAFCDCuRcEM4uS/mSpYBOrsNG2
+      BdeqMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADgYEAK3FXDlNbJrFx2m/8
+      haCp4Z+CLozes5al/biytcXp0gQDkfXVsZMulW63G2Dq2kYK8pbvnG+aPxmKRzBL
+      lUUu1RaU/AD6wz4n/gl+2+ZyQGyRv+00iWlIZ16/ulCshK1NwVobBeRQodeIWM/q
+      wClPpeOsljraXufnvqslw9e4ZNw=
+      -----END CERTIFICATE-----     
+parameters:
+- description: The name assigned to all of the frontend objects defined in this template.
+  displayName: Name
+  name: NAME
+  value: ssl
+- description: Maximum amount of memory the container can use.
+  displayName: Memory Limit
+  name: MEMORY_LIMIT
+  value: 1024Mi
+- description: The exposed hostname that will route to the Application service, if
+    left blank a value will be defaulted.
+  displayName: Application Hostname
+  name: APPLICATION_DOMAIN
+- description: The URL of the repository with your application source code.
+  displayName: Git Repository URL
+  name: SOURCE_REPOSITORY_URL
+  value: https://github.com/shah-zobair/frontend-backend-ssl.git
+- description: Set this to a branch name, tag or other ref of your repository if you
+    are not using the default branch.
+  displayName: Git Reference
+  name: SOURCE_REPOSITORY_REF
+- description: Set this to the relative path to your project if it is not in the root
+    of your repository.
+  displayName: Context Directory
+  name: CONTEXT_DIR
+  value: apache
+- description: Set this to the relative path to your project if it is not in the root
+    of your repository.
+  displayName: Context Directory for backend (postgres)
+  name: CONTEXT_DIR_BACKEND
+  value: postgres
+- description: A secret string used to configure the GitHub webhook.
+  displayName: GitHub Webhook Secret
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression
+  name: GITHUB_WEBHOOK_SECRET
