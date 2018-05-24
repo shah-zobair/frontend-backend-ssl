@@ -12,7 +12,7 @@ RUN id
 USER root
 
 RUN cp ca-cert.pem /etc/pki/ca-trust/source/anchors/ && \
-    cp /home/jboss/.postgresql/root.crt /etc/pki/ca-trust/source/anchors/
+    cp /home/jboss/.postgresql/root.crt /etc/pki/ca-trust/source/anchors/ && \
     update-ca-trust extract
     
 RUN rm -rf $JWS_HOME/lib/mongo.jar && rm -rf $JWS_HOME/lib/mysql-connector-java.jar
