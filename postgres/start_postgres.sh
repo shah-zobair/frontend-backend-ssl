@@ -28,7 +28,8 @@ cp /tmp/certs/server.crt /etc/pki/tls/certs/
 cp /tmp/certs/server.key /var/lib/pgsql/data/server.key
 cp /tmp/certs/server.key /etc/pki/tls/private/
 chmod 600 /var/lib/pgsql/data/server.key /etc/pki/tls/private/server.key
-update-ca-trust
+update-ca-trust enable
+update-ca-trust extract
 
 #echo "host    all             all             0.0.0.0/0               md5" >> /var/lib/pgsql/data/pg_hba.conf
 #echo "hostssl all         postgres    0.0.0.0/0             md5 clientcert=1" >> /var/lib/pgsql/data/pg_hba.conf
