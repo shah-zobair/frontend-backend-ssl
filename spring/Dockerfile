@@ -17,5 +17,4 @@ RUN cp ca-cert.pem /etc/pki/ca-trust/source/anchors/ && \
     
 RUN rm -rf $JWS_HOME/lib/mongo.jar && rm -rf $JWS_HOME/lib/mysql-connector-java.jar
 
-COPY *.war $JWS_HOME/webapps/app#scr#icps#api.war
-
+COPY icps.war $JWS_HOME/webapps/app#scr#icps#api.war
