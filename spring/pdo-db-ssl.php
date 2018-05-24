@@ -5,9 +5,9 @@ $dbpass = 'shah123';
 $host = 'localhost';
 $port = '5432';
 $dbname = 'testing';
-$sslcert = 'client-cert.pem';
-$sslkey = 'client-key.pem';
-$sslrootcert = 'bundle.pem';
+$sslcert = '/tmp/CERTS/client-cert.pem';
+$sslkey = '/tmp/CERTS/client-userkey.pem';
+$sslrootcert = '/tmp/CERTS/bundle.pem';
 
 #$conn = new PDO("pgsql:host=$host;dbname=$dbname", $dbuser, $dbpass);
 $conn = new PDO("pgsql:host=$host;dbname=$dbname;port=$port;sslmode=require;sslcert=$sslcert;sslkey=$sslkey;sslrootcert=$sslrootcert", $dbuser, $dbpass);
