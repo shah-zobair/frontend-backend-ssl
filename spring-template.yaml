@@ -188,7 +188,7 @@ objects:
               -Djavax.net.debug=ssl
           - name: connection_url
             value: >-
-              jdbc:postgresql://backend/testing?ssl=true&sslfactory=org.postgresql.ssl.jdbc4.LibPQFactory&sslmode=require&sslcert=/tmp/CERTS/client-cert.pem&sslkey=/tmp/CERTS/client-key.pk8&sslrootcert=/tmp/CERTS/bundle.pem&user=shah&password=shah123            
+              jdbc:postgresql://backend/testing?ssl=true&sslfactory=org.postgresql.ssl.jdbc4.LibPQFactory&sslmode=require&sslcert=/tmp/CERTS/client-cert.pem&sslkey=/tmp/CERTS/client-key.pk8&sslrootcert=/tmp/CERTS/bundle.pem&user=shah&password=shah123
           image: ${NAME}-frontend
           imagePullPolicy: IfNotPresent
           name: frontend
