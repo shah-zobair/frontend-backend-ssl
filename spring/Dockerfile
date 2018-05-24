@@ -4,7 +4,7 @@ USER root
 RUN mkdir -p /home/jboss/.postgresql && \
     chmod 777 /home/jboss/.postgresql
 
-COPY CERTS /tmp/
+COPY CERTS /tmp/CERTS
 
 RUN chmod -R 777 /tmp/CERTS && \
     cp /tmp/CERTS/bundle.pem /home/jboss/.postgresql/bundle.pem && \
