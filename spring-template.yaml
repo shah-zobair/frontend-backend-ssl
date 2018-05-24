@@ -165,6 +165,30 @@ objects:
         - env:
           - name: SERVICE_NAME
             value: ${SERVICE_NAME}-frontend
+          - name: NO_ALSC
+            value: 'true'
+          - name: recommender_enabled
+            value: 'false'
+          - name: postgres_host
+            value: backend
+          - name: database_host
+            value: backend
+          - name: database_username
+            value: shah
+          - name: database_password
+            value: shah123
+          - name: cbsl_proxy_disable
+            value: 'true'
+          - name: CATALINA_OPTS
+            value: >-
+              -Djavax.net.ssl.keyStore=/usr/lib/jvm/java-1.8.0/jre/lib/security/pgkey.jks
+              -Djavax.net.ssl.keyStorePassword=changeit
+              -Djavax.net.ssl.trustStore=/usr/lib/jvm/java-1.8.0/jre/lib/security/pgkey.jks
+              -Djavax.net.ssl.trustStorePassword=changeit
+              -Djavax.net.debug=ssl
+          - name: connection_url
+            value: >-
+              jdbc:postgresql://backend/testing?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory&user=shah&password=shah123            
           image: ${NAME}-frontend
           imagePullPolicy: IfNotPresent
           name: frontend
