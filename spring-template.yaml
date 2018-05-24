@@ -1,0 +1,222 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: frontend-spring
+metadata:
+  annotations:
+    description: Template for deploying Apache and Postgres on RHEL
+    iconClass: icon-postgres-database
+    tags: quickstart,oracle
+  name: frontend-spring
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: webserver31-tomcat7-openshift
+  spec:
+    tags:
+    - from:
+        kind: DockerImage
+        name: registry.access.redhat.com/jboss-webserver-3/webserver31-tomcat7-openshift
+      name: latest
+      importPolicy:
+        scheduled: true
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances the application pods
+    name: ${NAME}-frontend-web
+  spec:
+    ports:
+    - name: web
+      port: 8080
+      targetPort: 8080
+    selector:
+      name: ${NAME}-frontend
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances the application pods
+    name: ${NAME}-frontend-ssl
+  spec:
+    ports:
+    - name: ssl
+      port: 8443
+      targetPort: 8443
+    selector:
+      name: ${NAME}-frontend
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${NAME}-frontend-web
+  spec:
+    host: ${APPLICATION_DOMAIN}
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: ${NAME}-frontend-web
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${NAME}-frontend-ssl
+  spec:
+    host: ${APPLICATION_DOMAIN}
+    port:
+      targetPort: 8443
+    to:
+      kind: Service
+      name: ${NAME}-frontend-ssl
+    tls:
+      termination: reencrypt
+      insecureEdgeTerminationPolicy: None
+      destinationCACertificate: |-
+        -----BEGIN CERTIFICATE-----
+        MIID5TCCAs2gAwIBAgIJAI4cWMvhn2+jMA0GCSqGSIb3DQEBCwUAMIGIMQswCQYD
+        VQQGEwJDQTELMAkGA1UECAwCT04xEDAOBgNVBAcMB1Rvcm9udG8xFDASBgNVBAoM
+        C1JlZCBIYXQgSW5jMQswCQYDVQQLDAJTUzEUMBIGA1UEAwwLUmVkIEhhdCBJbmMx
+        ITAfBgkqhkiG9w0BCQEWEnN6b2JhaXJAcmVkaGF0LmNvbTAeFw0xODA1MjIxNDA5
+        MjVaFw0xODA2MjExNDA5MjVaMIGIMQswCQYDVQQGEwJDQTELMAkGA1UECAwCT04x
+        EDAOBgNVBAcMB1Rvcm9udG8xFDASBgNVBAoMC1JlZCBIYXQgSW5jMQswCQYDVQQL
+        DAJTUzEUMBIGA1UEAwwLUmVkIEhhdCBJbmMxITAfBgkqhkiG9w0BCQEWEnN6b2Jh
+        aXJAcmVkaGF0LmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJn
+        kKmsOIKsrA2wdhS/iBE/D3O1fyEOi4itrGLc5EnSRIbdtIBFCBVAEIRzR8WtDouv
+        QzvNreC9GEA+ZJAurb5TDAKyCYvH4x2iNmMwjOIRLjDjqqCqGeDrRd/aRv6l5Ab4
+        5gaU69RVby/nmKWpSHuvoGmRcthaLHCoyJr1JT52E7ww7NslJ7gkW9OTSBbhTfBe
+        DyISNHnmaZ8OMQzK+NZZbePFjheD/7UunJvr/KHL6ojyEcJhe9Doz3QIWcq0S35J
+        j89mvDs95QCKTlQNCDn4BkLA6pO+ehW755k8v47TrpwcL+Oja4j8gQw/3BAsZjIP
+        X6BT3XFk+Xviuqzo5lkCAwEAAaNQME4wHQYDVR0OBBYEFPpEC1+o4T4HPf22Y9Sv
+        P4tJJIBBMB8GA1UdIwQYMBaAFPpEC1+o4T4HPf22Y9SvP4tJJIBBMAwGA1UdEwQF
+        MAMBAf8wDQYJKoZIhvcNAQELBQADggEBAEhg39qC6/CR+G58B1GqlImzBn/5tI0c
+        oRSu2dPRmhoJ6bUclBkiqpq5l9ShD14A5RGT/sH47sB2F6cew+XujKVyZdH6NHku
+        sZjGGZ2v3eivERbfj6DCzNEjwVEj1ksa83jw2nfK7tAwpffhFX2eBlaqXPKmfwYn
+        Pkpm3WBZnvpRyx9NbyazOSwQWyHjIyS6z+fNaTMBs/pdDGR9OUe+EKTbUIjv+R90
+        EJRNv3NOwI/XOzgz84TG9T0DF8DEjlwmmZcyDZEgAOXJT8kLKplf3Sn3TBgSBr+W
+        cMeVe9/tAKTfQKfJ3FphtVVOgZuJX4krEjWn6jJRwr2zpI3H7pXIxJs=
+        -----END CERTIFICATE-----
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application image
+    name: ${NAME}-frontend
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      description: Defines how to build the application
+    name: ${NAME}-frontend
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${NAME}-frontend:latest
+    source:
+      contextDir: ${CONTEXT_DIR}
+      git:
+        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${SOURCE_REPOSITORY_URL}
+      type: Git
+    strategy:
+      dockerStrategy:
+        env:
+        - name: GIT_SSL_NO_VERIFY
+          value: "true"
+        from:
+          kind: ImageStreamTag
+          name: webserver31-tomcat7-openshift:latest
+      type: Source
+    triggers:
+    - type: ImageChange
+    - type: ConfigChange
+    - github:
+        secret: ${GITHUB_WEBHOOK_SECRET}
+      type: GitHub
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Defines how to deploy the application server
+    name: ${NAME}-frontend
+  spec:
+    replicas: 1
+    selector:
+      name: ${NAME}-frontend
+    strategy:
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          name: ${NAME}-frontend
+        name: ${NAME}-frontend
+      spec:
+        containers:
+        - env:
+          - name: SERVICE_NAME
+            value: ${SERVICE_NAME}-frontend
+          image: ${NAME}-frontend
+          imagePullPolicy: IfNotPresent
+          name: frontend
+          ports:
+          - containerPort: 8080
+            name: web1
+          - containerPort: 8443
+            name: web2
+          - containerPort: 8778
+            name: web3
+          resources:
+            limits:
+              memory: ${MEMORY_LIMIT}      
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - frontend
+        from:
+          kind: ImageStreamTag
+          name: ${NAME}-frontend:latest
+        lastTriggeredImage: ""
+      type: ImageChange
+    - type: ConfigChange  
+parameters:
+- description: The name assigned to all of the frontend objects defined in this template.
+  displayName: Name
+  name: NAME
+  value: spring
+- description: Maximum amount of memory the container can use.
+  displayName: Memory Limit
+  name: MEMORY_LIMIT
+  value: 2048Mi
+- description: The exposed hostname that will route to the Application service, if
+    left blank a value will be defaulted.
+  displayName: Application Hostname
+  name: APPLICATION_DOMAIN
+- description: The URL of the repository with your application source code.
+  displayName: Git Repository URL
+  name: SOURCE_REPOSITORY_URL
+  value: https://github.com/shah-zobair/frontend-backend-ssl.git
+- description: Set this to a branch name, tag or other ref of your repository if you
+    are not using the default branch.
+  displayName: Git Reference
+  name: SOURCE_REPOSITORY_REF
+- description: Set this to the relative path to your project if it is not in the root
+    of your repository.
+  displayName: Context Directory
+  name: CONTEXT_DIR
+  value: spring
+- description: A secret string used to configure the GitHub webhook.
+  displayName: GitHub Webhook Secret
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression
+  name: GITHUB_WEBHOOK_SECRET
