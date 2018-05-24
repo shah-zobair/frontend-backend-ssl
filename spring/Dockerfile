@@ -8,8 +8,8 @@ COPY ca.crt /home/jboss/.postgresql/root.crt
 COPY mykeystore.jks $JAVA_HOME/jre/lib/security/pgkey.jks
 
 RUN id
-
 USER root
+RUN id
 
 RUN cp ca-cert.pem /etc/pki/ca-trust/source/anchors/ && \
     cp /home/jboss/.postgresql/root.crt /etc/pki/ca-trust/source/anchors/ && \
