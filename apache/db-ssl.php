@@ -68,7 +68,7 @@ X2SASdwCkf/CwrdY7L6kconL5ps3lXypjB9iw2Gc731HtrrFEgNMYEtoVS+lNcbr
 foreach ($conn->query($sql) as $row) {
         print $row['username'] . "\t";
         print $row['cc'] . "\n";
-
+    }
 
 
 ?>
