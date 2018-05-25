@@ -97,7 +97,7 @@ objects:
     selector:
       name: ${NAME}-backend
     strategy:
-      type: Rolling
+      type: Recreate
     template:
       metadata:
         labels:
