@@ -4,7 +4,9 @@ FROM registry.access.redhat.com/rhel7
 
 RUN yum --disablerepo='*' --enablerepo=rhel-7-server-rpms --enablerepo=rhel-7-server-extras-rpms update -y && \
     yum --disablerepo='*' --enablerepo=rhel-7-server-rpms --enablerepo=rhel-7-server-extras-rpms --enablerepo=rhel-7-server-optional-rpms install -y httpd mod_rewrite php php-bcmath php-cli php-common php-devel php-mysql php-odbc php-pdo  php-pspell php-pgsql php-ldap php-mbstring php-gd mod_ssl php-pear gnupg libgpg-error gpgme gpgme-devel php-devel gcc && yum clean all
-
+RUN pecl install gnupg && \
+    echo "extension=gnupg.so" >> /etc/php.ini
+    
 RUN useradd 1001 \
  && chown -R 1001:1001 /var/log/httpd \
  && chown -R 1001:1001 /etc/httpd \
