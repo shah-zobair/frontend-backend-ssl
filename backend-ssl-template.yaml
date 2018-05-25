@@ -45,6 +45,16 @@ objects:
       description: Keeps track of changes in the application image
     name: ${NAME}-backend
 - apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: ${NAME}-pvc
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${VOLUME_CAPACITY}
+- apiVersion: v1
   kind: BuildConfig
   metadata:
     annotations:
@@ -109,12 +119,17 @@ objects:
               memory: ${MEMORY_LIMIT}
           volumeMounts:
           - mountPath: /tmp/certs
-            name: postgres-server-certs   
+            name: postgres-server-certs
+          - mountPath: /var/lib/pgsql
+            name: ${NAME}-pvc
         volumes:
         - name: postgres-server-certs
           configMap:
             defaultMode: 0777
             name: postgres-server-certs
+        - name: ${NAME}-pvc
+          persistentVolumeClaim:
+            claimName: ${NAME}-pvc
     triggers:
     - imageChangeParams:
         automatic: true
@@ -234,3 +249,7 @@ parameters:
   from: '[a-zA-Z0-9]{40}'
   generate: expression
   name: GITHUB_WEBHOOK_SECRET
+- description: Volume space available for data, e.g. 512Mi, 2Gi
+  name: VOLUME_CAPACITY
+  required: true
+  value: 2Gi
