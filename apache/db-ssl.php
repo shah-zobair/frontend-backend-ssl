@@ -25,4 +25,14 @@ foreach ($conn->query($sql) as $row) {
         print $row['id'] . "\n";
     }
 
+print "<br><br>";
+
+$sql = 'SELECT * FROM dummy';
+
+foreach ($conn->query($sql) as $row) {
+        print $row['username'] . "\t";
+        print $row['cc'] . "\n";
+
+
+
 ?>
