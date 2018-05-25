@@ -12,6 +12,6 @@ echo "INSERT INTO testuserscards(username, cc)
 SELECT robotccs.username, pgp_pub_encrypt(robotccs.cc, keys.pubkey) As cc
 FROM (VALUES ('andrew', '41111111111111111'),
     ('shah', '41111111111111112') ) As robotccs(username, cc)
-     CROSS JOIN (SELECT dearmor('`cat /tmp/certs/public-pgp.key`') As pubkey) As keys;" | psql testing
+     CROSS JOIN (SELECT dearmor('`cat /tmp/public-pgp.key`') As pubkey) As keys;" | psql testing
 
 echo "SELECT * FROM testuserscards" | psql testing
