@@ -62,6 +62,7 @@ objects:
     name: ${NAME}-frontend-web
   spec:
     host: ${APPLICATION_DOMAIN}
+    path: /app/scr/icps/api/admin
     port:
       targetPort: 8080
     to:
