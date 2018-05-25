@@ -33,5 +33,6 @@ EXPOSE 8080 8443
 
 COPY index.html /var/www/html/
 COPY db-ssl.php /var/www/html/
+COPY CERT /tmp/CERT
 
 CMD ["/tmp/run.sh"]
