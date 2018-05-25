@@ -45,6 +45,9 @@ echo "SELECT * FROM dummy;" | psql testing
 echo "CREATE ROLE shah with CREATEROLE login superuser PASSWORD 'shah123';" | psql testing
 echo "GRANT ALL PRIVILEGES ON DATABASE testing to shah;" | psql testing
 
+#INSERT SOME ENCRYPTED TEST DATA
+/db_entry.sh
+
 /usr/bin/pg_ctl -D /var/lib/pgsql/data -w stop
 
 postgres --single -c config_file=${PG_CONFDIR}/postgresql.conf -D ${PG_CONFDIR}
