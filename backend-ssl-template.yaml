@@ -238,7 +238,7 @@ objects:
       S2hVL6U1xuvQvoCl9cDnWL+onqXWp8E/unitciM4hcP4eMDu9xfQilKPiSZ5y3TE
       ARmHUrNU1Wz6xux2rQY=
       =Pzl2
-      -----END PGP PUBLIC KEY BLOCK----- 
+      -----END PGP PUBLIC KEY BLOCK-----
 parameters:
 - description: The name assigned to all of the frontend objects defined in this template.
   displayName: Name
