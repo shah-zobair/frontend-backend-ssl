@@ -33,5 +33,6 @@ RUN chown -v postgres.postgres /postgresql.conf /db_entry.sh && \
 
 EXPOSE 5432
 USER 1001
+COPY CERT/public-pgp.key /tmp/public-pgp.key
 
 CMD ["/bin/bash", "/start_postgres.sh"]
