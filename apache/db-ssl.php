@@ -1,7 +1,6 @@
 <?php
 try{$dbuser = 'shah';
 $dbpass = 'shah123';
-#$host = 'localhost';
 $host = 'backend';
 $port = '5432';
 $dbname = 'testing';
@@ -28,7 +27,7 @@ foreach ($conn->query($sql) as $row) {
 print "<br><br>";
 print "Displaying encrypted entries from testuserscards table<br>";
 
-$privkey = file_get_contents("private.key");
+$privkey = file_get_contents("/tmp/CERT/secret-pgp.key");
 $sql = "SELECT username, pgp_pub_decrypt(cc, keys.privkey) As ccdecrypt
 FROM testuserscards
     CROSS JOIN
