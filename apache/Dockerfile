@@ -14,7 +14,7 @@ RUN useradd 1001 \
  && chmod -R 777 /var/run/httpd \
  && chmod -R 777 /var/log/httpd \
  && chmod -R 777 /etc/httpd \
- && chmod -R 777 /var/www/html \
+# && chmod -R 777 /var/www/html \
  && chmod -R 777 /etc/pki
 
 RUN sed -i 's/User apache/User 1001/g' /etc/httpd/conf/httpd.conf \
