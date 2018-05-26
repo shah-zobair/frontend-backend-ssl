@@ -35,7 +35,7 @@ FROM testuserscards
 
 foreach ($conn->query($sql) as $row) {
         print $row['username'] . "\t";
-        print $row['ccdecrypt'] . "\n";
+        print $row['ccdecrypt'] . "<br>";
 }
 
 ?>
