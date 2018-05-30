@@ -146,7 +146,7 @@ objects:
   metadata:
     name: postgres-server-certs
   data:
-    server.crt: |-
+    server-cert.pem: |-
       -----BEGIN CERTIFICATE-----
       MIIDVjCCAj4CAQEwDQYJKoZIhvcNAQELBQAwcTELMAkGA1UEBhMCQ0ExCzAJBgNV
       BAgMAk9OMRAwDgYDVQQHDAdUb3JvbnRvMQ8wDQYDVQQKDAZSZWRIYXQxDzANBgNV
@@ -167,7 +167,7 @@ objects:
       z/OsaKafxNmWzAO4ISeuEwBOq4d/IKk1X2aeW8e/HG1tZC/kVy5+k31aHg1tslIS
       4G+8U8fkpCI+i+ldtMpVZbQKhyJDQsHKJ8eQNxrO4ijGWHGCXBNagEaD
       -----END CERTIFICATE-----
-    server.key: |-
+    server-key.pem: |-
       -----BEGIN RSA PRIVATE KEY-----
       MIIEpAIBAAKCAQEAmshILPdZglio9vVKPbDLJ3a7Os6x0BSt3eisrowRQVgtATmX
       opQCCKgruOzOxiCgpIIoxtjytgTqEcbWx2H9u1Sw9q7Zz1D8jiFxmUwBSlFNJCiv
