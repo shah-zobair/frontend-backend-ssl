@@ -271,7 +271,7 @@ objects:
   metadata:
     name: postgres-client-certs
   data:
-    postgresql.crt: |-
+    client-cert.pem: |-
       -----BEGIN CERTIFICATE-----
       MIIDMTCCAhkCAQEwDQYJKoZIhvcNAQELBQAwcTELMAkGA1UEBhMCQ0ExCzAJBgNV
       BAgMAk9OMRAwDgYDVQQHDAdUb3JvbnRvMQ8wDQYDVQQKDAZSZWRIYXQxDzANBgNV
@@ -292,7 +292,7 @@ objects:
       8pXYYlOC9MJ17NXaRGiwKl7sId8THa0JJo9XR1bRG9RhFhxGmHwDH5gQLjRfPDJG
       bvzpiLg=
       -----END CERTIFICATE-----
-    postgresql.key: |-
+    client-key.pem: |-
       -----BEGIN RSA PRIVATE KEY-----
       MIIEpAIBAAKCAQEAulEzxGw7O6YFQdoCjUUfLHqHBlLuErhqQaU36eYv80BBZgdU
       8uvzFesBLZZ1TqnKBSEJrpv/vCP66m1LF4y+nNlfqJEZt1euohMP+SCpNYgScjnH
