@@ -4,7 +4,7 @@ $dbpass = 'shah123';
 $host = 'backend';
 $port = '5432';
 $dbname = 'testing';
-$sslcert = '/tmp/certs/postgresql.crt';
+$sslcert = '/tmp/certs/client-cert.pem';
 $sslkey = '/tmp/postgresql-user.key';
 $sslrootcert = '/tmp/certs/root.crt';
 
