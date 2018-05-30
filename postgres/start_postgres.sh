@@ -14,7 +14,6 @@ sed -i s/1001/$SYS_GID/g /etc/group
 if [ ! -d "/var/lib/pgsql/data" ]; then
     mkdir /var/lib/pgsql/data
     chmod 700 /var/lib/pgsql/data
-    touch /var/lib/pgsql/data/a
     cp -r /BACKUP/data/* /var/lib/pgsql/data
     cp /BACKUP/initdb.log /var/lib/pgsql/
     cp -r /BACKUP/backups /var/lib/pgsql/
@@ -23,10 +22,10 @@ fi
 cp /postgresql.conf /var/lib/pgsql/data/postgresql.conf
 cp /tmp/certs/root.crt /var/lib/pgsql/data/root.crt
 cp /tmp/certs/root.crt /etc/pki/ca-trust/source/anchors/
-cp /tmp/certs/server.crt /var/lib/pgsql/data/server.crt
-cp /tmp/certs/server.crt /etc/pki/tls/certs/
-cp /tmp/certs/server.key /var/lib/pgsql/data/server.key
-cp /tmp/certs/server.key /etc/pki/tls/private/
+cp /tmp/certs/server-cert.pem /var/lib/pgsql/data/server.crt
+cp /tmp/certs/server-cert.pem /etc/pki/tls/certs/
+cp /tmp/certs/server-key.pem /var/lib/pgsql/data/server.key
+cp /tmp/certs/server-key.pem /etc/pki/tls/private/
 chmod 600 /var/lib/pgsql/data/server.key /etc/pki/tls/private/server.key
 update-ca-trust enable
 update-ca-trust extract
