@@ -7,7 +7,7 @@ metadata:
     description: Template for deploying Apache and Postgres on RHEL
     iconClass: icon-postgres-database
     tags: quickstart,oracle
-  name: frontend-backend-ssl
+  name: frontend-apache
 objects:
 - apiVersion: v1
   kind: ImageStream
