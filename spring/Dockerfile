@@ -14,8 +14,8 @@ RUN chmod -R 777 /tmp/CERTS && \
     update-ca-trust extract && \
     rm -rf $JWS_HOME/lib/mongo.jar && rm -rf $JWS_HOME/lib/mysql-connector-java.jar
 
-RUN yum --disablerepo='*' --enablerepo=rhel-7-server-rpms --enablerepo=rhel-7-server-extras-rpms update -y && \
-    yum --disablerepo='*' --enablerepo=rhel-7-server-rpms --enablerepo=rhel-7-server-extras-rpms install -y php php-bcmath php-cli php-common php-devel php-mysql php-odbc php-pdo php-pspell php-pgsql php-ldap php-mbstring php-gd mod_ssl openssl && yum clean all
+#RUN yum --disablerepo='*' --enablerepo=rhel-7-server-rpms --enablerepo=rhel-7-server-extras-rpms update -y && \
+#    yum --disablerepo='*' --enablerepo=rhel-7-server-rpms --enablerepo=rhel-7-server-extras-rpms install -y php php-bcmath php-cli php-common php-devel php-mysql php-odbc php-pdo php-pspell php-pgsql php-ldap php-mbstring php-gd mod_ssl openssl && yum clean all
     
 USER jboss
 
