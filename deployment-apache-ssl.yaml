@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apache
+spec:
+  selector:
+    matchLabels:
+      app: apache
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: apache
+        version: v1
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: node-role.kubernetes.io/app
+                operator: In
+                values:
+                - ""
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: apache
+        image: quay.io/szobair/apache-ssl
+        env:
+        - name: SERVICE_NAME
+          value: apache
+        ports:
+        - containerPort: 8443
+        resources:
+          limits:
+            cpu: "500m"
+            memory: 500Mi
+          requests:
+            cpu: "200m"
+            memory: 250Mi
+        volumeMounts:
+        - mountPath: /certs
+          name: apache-cert
+      volumes:
+      - name: apache-cert
+        secret:
+          defaultMode: 400
+          secretName: apache-cert
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: apache
+  labels:
+    app: apache
+    version: v1
+spec:
+  ports:
+  - port: 8443
+    name: https
+    targetPort: 8443
+  selector:
+    app: apache
+    version: v1
